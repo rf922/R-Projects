@@ -1,0 +1,57 @@
+---
+title: "Chapter 2 HW"
+author: "Tom"
+date: "Due date of Chapter 2 HW"
+output:
+  html_document:
+    fig_height: 4
+    highlight: pygments
+    theme: spacelab
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+# DO NOT ALTER CODE IN THIS CHUNK
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(ggplot2)
+```
+
+* * *
+
+## Conceptual Questions
+
+
+#### Exercise 1: What is Statisistical Learning?
+
+Statistical Learning refers to a set of tools to understand data.
+
+
+
+#### Exercise 2: What is Data Mining?
+
+Data mining is the analysis step of "knowledge discovery in databases" process.
+
+* * *
+
+## Applied Questions
+
+#### Exercise 3: 
+(a) add code to the chuck. $Y=\beta_0+\beta_1x+\epsilon$
+
+$$p_k(x)=\frac{\pi_kf_k(x)}{\sum_{l=1}^K\pi_lf_l(x)}$$  
+
+
+```{r}
+summary(cars)
+plot(cars)
+```
+
+(b) make comments if needed.
+
+
+
+
+
+
