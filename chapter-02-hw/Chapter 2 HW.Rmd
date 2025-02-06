@@ -3,11 +3,11 @@ title: "Chapter 2 HW"
 author: "Fabiani Rafael"
 #date: "Due date of Chapter 2 HW"
 output:
-  pdf_document: default
   html_document:
     fig_height: 4
     highlight: pygments
     theme: spacelab
+  pdf_document: default
   word_document: default
 ---
 
@@ -23,7 +23,7 @@ library(ggplot2)
 ## Conceptual Questions
 
 
-#### Exercise 2: Explain whether each scenario is a classification or regression prob-lem, and indicate whether we are most interested in inference or prediction. Finally, provide n and p.
+#### Exercise 2: Explain whether each scenario is a classification or regression prob-lem, and indicate whether we are most interested in inference or prediction. Finally, provide n := sample size and p := predictors.
 
 (a) We collect a set of data on the top 500 firms in the US. For each firm we record profit, number of employees, industry and the CEO salary. We are interested in understanding which factors affect CEO salary.
 
@@ -40,6 +40,12 @@ library(ggplot2)
 
 #### Exercise 4: You will now think of some real-life applications for statistical learn-ing.
 (a) Describe three real-life applications in which classification might be useful. Describe the response, as well as the predictors. Is the goal of each application inference or prediction? Explain your answer.
+
+    i. **Sentiment analysis for product reviews**
+    
+        **Response** : A sentiment label i.e an indicator for Positive, Negative and possibly Neutral reception.
+    
+        **Predictors** : Possibly predictors can be Text data (review  wording), star ratings, reviewer history
 
 (b) Describe three real-life applications in which regression might be useful. Describe the response, as well as the predictors. Is the goal of each application inference or prediction? Explain your answer.
 

@@ -1,0 +1,48 @@
+---
+title: "isl-lab-01"
+output: pdf_document
+date: "`r Sys.Date()`"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Chapter 2 ab practice questions
+1.	Use two ways to generate sequence 2, 4,…., 2000. Name it as v. Count how many elements are less than 499.
+```{r}
+#Using a sequence
+v <- seq(2, 2000, 2)
+print(v)
+#Using the colon operator
+v_0 <- 2* (1:1000)
+print(v_0)
+```
+
+2.   Generate a matrix. Name it as A.
+
+```{r}
+##Generate a matrix
+A <- matrix(data=c(1:9), ncol=3, nrow=3)
+```
+
+
+3.	Generate 100 random numbers from normal distribution with mean 20 and standard deviation 3. Name it as x.
+```{r}
+#Using rnorm
+x <- rnorm(100, mean=20, sd=3)
+```
+
+4.	Calculate the mean, standard deviation of vector x.
+```{r}
+x <- rnorm(100, mean=20, sd=3)
+#Using the sd function 
+sd(x)
+```
+
+5.	Create a histogram of vector x. Use some color and add a title to the plot.
+```{r}
+
+```
+6.	Use x to generate a 10 by 10 matrix. Remove the even number rows (2, 4, 6, 8, 10).
+7.	Load the Auto.data or Auto.csv. (a) Remove the missing values. (b) Give a numerical summary of variable “weight”. (c) Create a scatterplot of weight (x) vs mpg (y) with appropriate title. (d) Identify the name, mpg, weight for the subjects whose mpg is above 40 from the scatterplot generated in the previous part.
