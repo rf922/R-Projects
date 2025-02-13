@@ -360,7 +360,23 @@ range(Boston$ptratio)
 
 (e) How many of the census tracts in this data set bound the Charles river?
 
+```{r}
+
+# selecting tract which bound the river , i.e chas == 1 .
+#Boston[Boston$chas == 1,]
+
+# the num of such tracts
+num_tracts_river <- length(Boston[Boston$chas == 1,]$chas)
+```
+
+
 (f) What is the median pupil-teacher ratio among the towns in this data set?
+
+```{r}
+
+median_ptratio <- median(Boston$ptratio)
+print(median_ptratio)
+```
 
 (g) Which census tract of Boston has lowest median value of owner-occupied homes? What are the values of the other predictors for that census tract, and how do those values compare to the overall ranges for those predictors? Comment on your findings.
 
