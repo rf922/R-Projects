@@ -41,15 +41,28 @@ library(ggplot2)
 #### Exercise 4: You will now think of some real-life applications for statistical learn-ing.
 (a) Describe three real-life applications in which classification might be useful. Describe the response, as well as the predictors. Is the goal of each application inference or prediction? Explain your answer.
 
-    i. **Sentiment analysis for product reviews**
-    
-        **Response** : A sentiment label i.e an indicator for Positive, Negative and possibly Neutral reception.
-    
-        **Predictors** : Possibly predictors can be Text data (review  wording), star ratings, reviewer history
+- One example of a real life application in which classification would be useful is in sentiment analysis possibly for something like product reviews. Where in the response could be a sentiment label i.e an indicator for Positive, Negative and possibly Neutral reception. Then some predictors could be Text data ( for isntance review  wording), star ratings, and reviewer history to gauge tendency of a user to leave either highly negative or positive reviews. The goal of this example would be primarily prediction since our intent is to classiffy new product reviews into categories based on learned patterns from data.The model would be trained on labeled reviews where the sentiment is already known and then it would predict the sentiment of unseen reviews.
+
+- Another example of a real life application could be Handwritten digit recognition where in the response would be a digit label i.e (0-9) and the predictors could be pixel valus of the image, edge detection features and shape descriptors. The primary goal would be prediction i.e trying to predict the correct digit for new/unseen images. So the model would take an input of a handwritten digit and classify it as one of the digits 0-9 and then use that to predit the most likely represents.
+
+- A real life application could be in transaction classification i.e fraudulent or legitimate. Predictors such as transaction amount, time of the transaction , location , device used and transaction history. The goal here would again be precition becuase the main intent would be to identify fraudulent transactions in real time using past transaction data to train out model with transactions labeled as either fraudulent or legitimate. When a new transaction is made the model would predict whether it is a valid transaction i.e non fraudulent based on its feautures. So the task here would be classifying new transactions rather than undersrantinng the causes of fraud.
 
 (b) Describe three real-life applications in which regression might be useful. Describe the response, as well as the predictors. Is the goal of each application inference or prediction? Explain your answer.
 
+- One real-life application where regression may be found useful is in the analysis of drivers of life expectancy. A response value for this would be the persons life expectancy at birth (a continous val. in years). Predictors in this example could be things like GDP per capita, access to healthcare, sanitation, education, and other social factors. The goal of this application would be inference since the main intent would be to understand the relationship between the predictors and the response i.e life expectancy. The model would be used to understand how the predictors effect life expectancy and not necessarily to predict life expectancy.
+
+- Another example of an application where regression would be of use is in forcasting retail demand. A response value for this use case could be Daily sales volume (units sold) and the predictors could be things like day of the week, time of the year, weather, promotions, competitor pricing and maybe historical data like sales from the past 30 days. The goal of this application would be prediction since the main intent would be to predict future sales volume based on past sales data and other predictors to gauge future demand for inventory management. The model would be used to predict future sales volume based on past sales data and could help in anticipating holiday sales for a specific product to optimize stock levels.
+
+- An example of an application that could use regression is also in predicting renewable energy production i.e solar power, wind farms. A response value for this could be the amount of energy produced in a given time period. Predictors could be things like weather data for instance wind speed, temperature and air pressure, time of day, season, and location. The goal of this application would be prediction since the main intent would be to predict the amount of energy produced in the future based on past data. The model would be used to predict future energy production based on trends in previous energy production and could help in optimizing energy storage and distribution.
+
 (c) Describe three real-life applications in which cluster analysis might be useful.
+
+- One real-life application where cluster analysis might be useful is in customer segmentation. For instance in a retail setting, where the goal would be to segment customers into distinct groups based on their purchasing behavior / history. Clustered data could be customer transaction history , customer demographics, and engagement metrics. Predictors could be things like purchase frequency, average amount spent per order and product preferences. Demographic data that could be used can be age, location, and income and behaviral data would be things like website click or email open rates. This could help in tailoring marketing strategies to each group. For instance, a cluster of customers who buy mostly electronics could be targeted with electronics promotions because they may be more likely to be interested in those products.
+
+- Another real-life application where cluster analysis might be useful is in anomaly detection. For instance in network security where the goal would be to detect unusual behavior in network traffic. Clustered data could be network traffic data, user activity logs, and system logs such access attempts. Features here would be things like data transfer rates, login attempts, IP addresses, file access times, protocol type and time of day. This could help in identifying unusual patterns in network traffic that could be indicative of a security breach becuase clustering may help in distinguishing normal activity from anomalous clusters and security teams could prioritize investigating outliers flagged by the model.
+
+- Another real-life application where cluster analysis might be useful is in recommendation systems. For instance in a streaming service like Netflix where the goal would be to recommend movies or shows to users based on their viewing history. Clustered data could be user behavior for isntance viewing history, user ratings, search queries, and time spent on content or potentially content attributes like genre, actors, directors, and release year. Features here could be viewing habits, with similar themes or audience appeal as content clusters. This could help in recommending movies or shows to users based on their viewing history and preferences. For instance, a user who watches a lot of action movies could be recommended more action movies or a user who watches a lot of comedies could be recommended more comedies.
+
 
 * * *
 
@@ -97,6 +110,10 @@ Before reading the data into R, it can be viewed in Excel or a
 text editor.
 
 (a) Use the read.csv() function to read the data into R. Call the loaded data college. Make sure that you have the directory set to the correct location for the data.
+
+``` {r}
+college <- read.csv("College.csv")
+```
 
 (b) Look at the data using the View() function. You should notice that the first column is just the name of each university. We don’t really want R to treat this as data. However, it may be handy to have these names for later. Try the following commands:
 
