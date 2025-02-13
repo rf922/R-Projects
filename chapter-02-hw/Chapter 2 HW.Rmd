@@ -112,6 +112,9 @@ text editor.
 (a) Use the read.csv() function to read the data into R. Call the loaded data college. Make sure that you have the directory set to the correct location for the data.
 
 ``` {r}
+#check curr directory
+#getwd()
+
 college <- read.csv("College.csv")
 ```
 
@@ -121,20 +124,59 @@ college <- read.csv("College.csv")
 
 > View(college)
 
+```{r}
+rownames(college) <- college[, 1]
+
+#outputs the entire contents of colege (professor said it was okay to view just a subsection since the data is large)
+#View(college)
+
+#view first ten rows in college data set, with all columns
+View(college[1:10, c(1:19)])
+```
+
+
 You should see that there is now a row.names column with the name of each university recorded. This means that R has given each row a name corresponding to the appropriate university. R will not try to perform calculations on the row names. However, we still need to eliminate the first column in the data where the names are stored. Try
 
 > college <- college[, -1]
 
 > View(college)
 
+```{r}
+college <- college[, -1]
+View(college)
+```
+
 Now you should see that the first data column is Private. Note that another column labeled row.names now appears before the Private column. However, this is not a data column but rather the name that R is giving to each row.
 
 (c) 
-i. Use the summary() function to produce a numerical summary of the variables in the data set.56
+i. Use the summary() function to produce a numerical summary of the variables in the data set
+
+```{r}
+
+summary(college)
+
+```
 
 ii. Use the pairs() function to produce a scatterplot matrix of the first ten columns or variables of the data. Recall that you can reference the first ten columns of a matrix A using  A[,1:10].
 
+```{r}
+
+## passing college using [,2:10] to get the first ten col but skipping non numeric col private
+pairs(college[,2:10])
+```
+
 iii. Use the plot() function to produce side-by-side boxplots of Outstate versus Private.
+
+```{r}
+# debug chk types
+# str(college$Private)  # should be a factor but was char[]
+# str(college$Outstate) # int[]
+
+
+# fix type for plot()
+college$Private <- as.factor(college$Private)
+plot(college$Private, college$Outstate, xlab = "Private", ylab = "Outstate", col = "cyan", pch = 19)
+```
 
 iv. Create a new qualitative variable, called Elite, by binning the Top10perc variable. We are going to divide universities into two groups based on whether or not the proportion of students coming from the top 10 % of their high school classes exceeds 50 %.
 
@@ -146,9 +188,98 @@ iv. Create a new qualitative variable, called Elite, by binning the Top10perc va
 
 > college <- data.frame(college , Elite)
 
+```{r}
+Elite <- rep("No", nrow(college))
+Elite[college$Top10perc > 50] <- "Yes"
+Elite <- as.factor(Elite)
+college <- data.frame(college , Elite)
+```
+
 Use the summary() function to see how many elite universities there are. Now use the plot() function to produce side-by-side boxplots of Outstate versus Elite. v. Use the hist() function to produce some histograms with differing numbers of bins for a few of the quantitative variables. You may find the command par(mfrow = c(2, 2)) useful: it will divide the print window into four regions so that four plots can be made simultaneously. Modifying the arguments to this function will divide the screen in other ways.
 
 vi. Continue exploring the data, and provide a brief summary of what you discover.
+
+```{r}
+
+#college_name <- "University of California at Berkeley"
+#college[rownames(college) == college_name, ]
+
+
+
+# tmp increase margins fix for names being cut off
+par(mar = c(5, 10, 4, 2))  # Increase the left margin (10)
+
+# list of colleges id like to search for
+college_names <- c("University of California at Berkeley", "University of California at Irvine", "San Diego State University", "Santa Clara University", "University of San Francisco", "San Francisco State University", "University of California at Santa Barbara")
+
+# conv to lower case
+college_names_lower <- tolower(college_names) 
+rownames_lower <- tolower(rownames(college)) 
+
+# collect college entries
+collected_colleges<- college[rownames_lower %in% college_names_lower, ]
+
+
+# get acceptance rates 
+collected_colleges$AcceptanceRate <- (collected_colleges$Accept / collected_colleges$Apps) * 100
+
+# get enrollment rate
+collected_colleges$EnrollmentRate <- (collected_colleges$Enroll / collected_colleges$Apps) * 100
+
+barplot(collected_colleges$AcceptanceRate, 
+        names.arg = rownames(collected_colleges), 
+        main = "Acceptance Rates by University", 
+        xlab = "Acceptance Rate (%)", 
+        col = "lightgreen",
+        horiz = TRUE,                  
+        cex.names = 0.6,               
+        cex.axis = 0.6,                
+        las = 1,                       
+        xlim = c(0, max(collected_colleges$AcceptanceRate) * 1.1))  
+
+barplot(collected_colleges$Outstate, 
+        names.arg = rownames(collected_colleges), 
+        main = "Out-of-State Tuition by University", 
+        xlab = "Out-of-State Tuition ($)", 
+        col = "cyan",
+        horiz = TRUE,                       
+        cex.names = 0.6,                    
+        cex.axis = 0.6,                     
+        las = 1,                           
+        xlim = c(0, max(collected_colleges$Outstate) * 1.1))  
+
+# Create a vector of colors (one per university)
+n_colleges <- nrow(collected_colleges)
+colors <- rainbow(n_colleges)  # or use a custom palette like c("blue", "red", "green", ...)
+
+
+# Adjust plot margins to make space for the legend (bottom, left, top, right)
+par(mar = c(5, 4, 4, 8), xpd = TRUE)
+
+# Re-plot the points
+plot(collected_colleges$Apps, collected_colleges$Enroll, 
+     main = "Enrollment vs Applications", 
+     xlab = "Applications", 
+     ylab = "Enrollment", 
+     pch = 19, 
+     col = colors, 
+     cex = 1.2)
+
+# Add a legend outside the plot (adjust "inset" and "x" as needed)
+legend("topright", 
+       inset = c(-0.3, 0),  # Move legend outside the plot
+       legend = rownames(collected_colleges), 
+       col = colors, 
+       pch = 19, 
+       title = "Universities", 
+       cex = 0.5)
+
+
+# reset to default for next ex.
+par(mar = c(5, 4, 4, 2))
+```
+- For this portion of the exercise I wanted to compare the data for San Francisco State University , UC Berkeley, UC Santa Barbara, UC San Diego, Riverside, Santa Clara University, San Diego state and Eastbay but It seems like the data set was missing entries for San Francisco state along with other universities like UC Santa Barbara. I was able to find data for UC Berkeley, Santa Clara University, San Diego State University and University of San Francisco. I was able to calculate the acceptance rate and enrollment rate for each of these universities and then plot them along with the out of state tuition for each of these universities and I created a plot for enrollment vs applications. From the acceptance rate bar plot i saw that UC San Francisco and San Diego state gad the highest acceptance rates. From the out of state tuition bar plot I saw that Santa Clara University had the highest out of state tuition. From the enrollment vs applications plot I saw that UC Berkeley had the highest number of applications and enrollments.
+
 
 ### Exercise 10 This exercise involves the Boston housing data set.
 (a) To begin, load in the Boston data set. The Boston data set is part of the ISLR2 library.
@@ -166,11 +297,66 @@ Read about the data set:
 How many rows are in this data set? How many columns? What
 do the rows and columns represent?
 
+```{r}
+
+# load the ISLR2 lib, had to install with install.packages("ISLR2")
+library(ISLR2)
+
+# load boston data set
+Boston
+?Boston
+dim(Boston)
+colnames(Boston)
+```
+
+- The Boston data set has 506 rows and 13 columns. The rows represent the census tracts / neighborhoods in Boston. The columns represent different attributes of each neighborhood 
+
 (b) Make some pairwise scatterplots of the predictors (columns) in this data set. Describe your findings.
+
+```{r}
+pairs(Boston)
+```
 
 (c) Are any of the predictors associated with per capita crime rate? If so, explain the relationship.
 
+```{r}
+for (i in 1:ncol(Boston)) {
+    if (colnames(Boston)[i] != "crim") {
+        plot(
+            Boston$crim, 
+            Boston[, i], 
+            xlab = "Per Capita Crime Rate (crim)", 
+            ylab = colnames(Boston)[i], 
+            main = paste("Per Capita Crime Rate vs", colnames(Boston)[i])
+        )
+    }
+}
+cor(Boston)
+```
+- Yes, from the output plots it seems that crime correlates to several predictors such as age, dis, medv,rad, indus and tax. For instance, the per capita crime rate seems to increase with the age of the house, the distance to employment centers, the median value of owner-occupied homes, the index of accessibility to radial highways, the proportion of non-retail business acres per town and the full-value property-tax rate per $10,000.  These can be seen from inspecting their respective plots. 
+
 (d) Do any of the census tracts of Boston appear to have particularly high crime rates? Tax rates? Pupil-teacher ratios? Comment on the range of each predictor.
+
+```{r}
+# get the census tracts with the highest crime rates
+high_crim <- Boston[Boston$crim > 20, ]
+high_crim
+
+# get the census tracts with the highest tax rates
+high_tax <- Boston[Boston$tax > 600, ]
+high_tax
+
+# get the census tracts with the highest pupil-teacher ratios
+high_ptratio <- Boston[Boston$ptratio > 20, ]
+high_ptratio
+
+# get the range of each predictor
+range(Boston$crim)
+range(Boston$tax)
+range(Boston$ptratio)
+```
+
+- Yes, there are census tracts with particularly high crime rates, tax rates and pupil-teacher ratios. For instance, census tracts with crime rates greater than 20 have particularly high crime rates. Census tracts with tax rates greater than 600 have particularly high tax rates. Census tracts with pupil-teacher ratios greater than 20 have particularly high pupil-teacher ratios. The range of each predictor is as follows: the per capita crime rate ranges from 0 to 89.0, the full-value property-tax rate per $10,000 ranges from 187 to 711, and the pupil-teacher ratio by town ranges from 12.6 to 22.0.
 
 (e) How many of the census tracts in this data set bound the Charles river?
 
