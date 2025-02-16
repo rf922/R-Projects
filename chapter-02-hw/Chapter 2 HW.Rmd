@@ -117,6 +117,7 @@ text editor.
 #check curr directory
 #getwd()
 
+#reading college into R
 college <- read.csv("College.csv")
 ```
 
@@ -127,13 +128,14 @@ college <- read.csv("College.csv")
 > View(college)
 
 ```{r}
+# rm first col
 rownames(college) <- college[, 1]
 
-#outputs the entire contents of colege (professor said it was okay to view just 
-#a subsection (since the data is large)
+#outputs the entire contents of colege 
 #View(college)
 
 #view first ten rows in college data set, with all columns
+# (professor said it was okay to view just a subsection (since the data is large)
 View(college[1:10, c(1:19)])
 ```
 
@@ -145,8 +147,13 @@ You should see that there is now a row.names column with the name of each univer
 > View(college)
 
 ```{r}
+# rm first col 
 college <- college[, -1]
-View(college)
+
+# confirm first col is gone (note 1:19 would throw an error since theres now 18 cols)
+#View(college)
+View(college[1:10, c(1:18)])
+
 ```
 
 Now you should see that the first data column is Private. Note that another column labeled row.names now appears before the Private column. However, this is not a data column but rather the name that R is giving to each row.
@@ -163,9 +170,11 @@ summary(college)
 ii. Use the pairs() function to produce a scatterplot matrix of the first ten columns or variables of the data. Recall that you can reference the first ten columns of a matrix A using  A[,1:10].
 
 ```{r}
+# fix non numeric col private, 
+college$Private <- as.factor(college$Private)
 
-## passing college using [,2:10] to get the first ten col but skipping non numeric col private
-pairs(college[,2:10])
+## passing college using [,1:10] to get the first ten col 
+pairs(college[,1:10])
 ```
 
 iii. Use the plot() function to produce side-by-side boxplots of Outstate versus Private.
@@ -177,7 +186,8 @@ iii. Use the plot() function to produce side-by-side boxplots of Outstate versus
 
 
 # fix type for plot()
-college$Private <- as.factor(college$Private)
+#college$Private <- as.factor(college$Private) moved to ii, before i was 
+#using pairs with indexing to skip private like college[,2:10]
 plot(college$Private, college$Outstate, xlab = "Private", ylab = "Outstate", col = "cyan", pch = 19)
 ```
 
@@ -198,11 +208,18 @@ Elite <- as.factor(Elite)
 college <- data.frame(college , Elite)
 ```
 
-Use the summary() function to see how many elite universities there are. Now use the plot() function to produce side-by-side boxplots of Outstate versus Elite. v. Use the hist() function to produce some histograms with differing numbers of bins for a few of the quantitative variables. You may find the command par(mfrow = c(2, 2)) useful: it will divide the print window into four regions so that four plots can be made simultaneously. Modifying the arguments to this function will divide the screen in other 
+Use the summary() function to see how many elite universities there are. Now use the plot() function to produce side-by-side boxplots of Outstate versus Elite. 
 
-v. Use the hist() function to produce some histograms with differing numbers of bins for a few of the quantitative vari- ables. You may find the command par(mfrow = c(2, 2)) useful: it will divide the print window into four regions so that four plots can be made simultaneously. Modifying the arguments to this function will divide the screen in other ways.
 ```{r}
+summary(college$Elite)
 
+plot(college$Elite, college$Outstate, xlab = "Elite", ylab = "Outstate", col = "cyan", pch = 19)
+
+```
+
+v. Use the hist() function to produce some histograms with differing numbers of bins for a few of the quantitative variables. You may find the command par(mfrow = c(2, 2)) useful: it will divide the print window into four regions so that four plots can be made simultaneously. Modifying the arguments to this function will divide the screen in other ways.
+```{r}
+# divide the print window into 4 x 4 for plots 
 par(mfrow = c(2, 2))
 hist(college$Apps, breaks = 20, col = "lightblue", main = "Applications")
 
@@ -223,12 +240,17 @@ vi. Continue exploring the data, and provide a brief summary of what you discove
 #college[rownames(college) == college_name, ]
 
 
-
 # tmp increase margins fix for names being cut off
-par(mar = c(5, 10, 4, 2))  # Increase the left margin (10)
+par(mar = c(5, 10, 4, 2)) 
 
 # list of colleges id like to search for
-college_names <- c("University of California at Berkeley", "University of California at Irvine", "San Diego State University", "Santa Clara University", "University of San Francisco", "San Francisco State University", "University of California at Santa Barbara")
+college_names <- c("University of California at Berkeley",
+                   "University of California at Irvine",
+                   "San Diego State University",
+                   "Santa Clara University",
+                   "University of San Francisco",
+                   "San Francisco State University",
+                   "University of California at Santa Barbara")
 
 # conv to lower case
 college_names_lower <- tolower(college_names) 
@@ -266,15 +288,14 @@ barplot(collected_colleges$Outstate,
         las = 1,                           
         xlim = c(0, max(collected_colleges$Outstate) * 1.1))  
 
-# Create a vector of colors (one per university)
+# vector of colors (one per university)
 n_colleges <- nrow(collected_colleges)
-colors <- rainbow(n_colleges)  # or use a custom palette like c("blue", "red", "green", ...)
+colors <- rainbow(n_colleges) 
 
-
-# Adjust plot margins to make space for the legend (bottom, left, top, right)
+# plot margins to make space for the legend (bottom, left, top, right)
 par(mar = c(5, 4, 4, 8), xpd = TRUE)
 
-# Re-plot the points
+# plot the points
 plot(collected_colleges$Apps, collected_colleges$Enroll, 
      main = "Enrollment vs Applications", 
      xlab = "Applications", 
@@ -283,9 +304,9 @@ plot(collected_colleges$Apps, collected_colleges$Enroll,
      col = colors, 
      cex = 1.2)
 
-# Add a legend outside the plot (adjust "inset" and "x" as needed)
+# legend for plot
 legend("topright", 
-       inset = c(-0.3, 0),  # Move legend outside the plot
+       inset = c(-0.3, 0),  # mv legend outside the plot
        legend = rownames(collected_colleges), 
        col = colors, 
        pch = 19, 
@@ -296,7 +317,7 @@ legend("topright",
 # reset to default for next ex.
 par(mar = c(5, 4, 4, 2))
 ```
-- For this portion of the exercise I wanted to compare the data for San Francisco State University , UC Berkeley, UC Santa Barbara, UC San Diego, Riverside, Santa Clara University, San Diego state and Eastbay but It seems like the data set was missing entries for San Francisco state along with other universities like UC Santa Barbara. I was able to find data for UC Berkeley, Santa Clara University, San Diego State University and University of San Francisco. I was able to calculate the acceptance rate and enrollment rate for each of these universities and then plot them along with the out of state tuition for each of these universities and I created a plot for enrollment vs applications. From the acceptance rate bar plot i saw that UC San Francisco and San Diego state gad the highest acceptance rates. From the out of state tuition bar plot I saw that Santa Clara University had the highest out of state tuition. From the enrollment vs applications plot I saw that UC Berkeley had the highest number of applications and enrollments.
+- For this portion of the exercise I wanted to compare the data for San Francisco State University , UC Berkeley, UC Santa Barbara, UC San Diego, Riverside, Santa Clara University, San Diego state and Eastbay but It seems like the data set was missing entries for San Francisco state along with other universities like UC Santa Barbara. I was able to find data for UC Berkeley, Santa Clara University, San Diego State University and University of San Francisco. I calculated the acceptance rate and enrollment rate for each of these universities and then plotted them along with the out of state tuition for each of these universities and I created a plot for enrollment vs applications. From the acceptance rate bar plot i saw that UC San Francisco and San Diego state had the highest acceptance rates. From the out of state tuition bar plot I saw that Santa Clara University had the highest out of state tuition. From the enrollment vs applications plot I saw that UC Berkeley had the highest number of applications and enrollments. I picked these colleges because I thought of applying to some of these places and had friends and professors who went to some of those schools.
 
 
 ### Exercise 10 This exercise involves the Boston housing data set.
@@ -320,11 +341,14 @@ do the rows and columns represent?
 # load the ISLR2 lib, had to install with install.packages("ISLR2")
 library(ISLR2)
 
-# load boston data set
-Boston
-?Boston
-#dim(Boston)
-#colnames(Boston)
+# load boston data set (commented out for sake of brevity)
+#Boston
+#?Boston
+# only a segment since the entire data set is so large
+Boston[1:10, c(1:13)]
+
+dim(Boston)
+colnames(Boston)
 ```
 
 - The Boston data set has 506 rows and 13 columns. The rows represent the census tracts / neighborhoods in Boston. The columns represent different attributes of each neighborhood 
@@ -335,8 +359,10 @@ Boston
 pairs(Boston)
 
 
-
 ```
+
+- From the scatterplots, we can see that some of the predictors have positive correlations for instance rm (average number of rooms per dwelling) appears to have a positive relationship with medv (median home value). This suggests that neighborhoods with larger homes tend to have higher property values. Another thing I notice is dis (distance to employment centers) seems positively correlated with medv, indicating that homes farther from the city center tend to have higher values. There are also some negative correlations for instance lstat (percent lower status of the population) seems to have a negative relationship with medv, suggesting that neighborhoods with a higher percentage of lower status residents tend to have lower property values. 
+
 
 (c) Are any of the predictors associated with per capita crime rate? If so, explain the relationship.
 
@@ -379,25 +405,56 @@ Strongest Negative Correlations with Crime (crim):
 (d) Do any of the census tracts of Boston appear to have particularly high crime rates? Tax rates? Pupil-teacher ratios? Comment on the range of each predictor.
 
 ```{r}
-# get the census tracts with the highest crime rates
+# get the census tracts with the highest crime rates 
 high_crim <- Boston[Boston$crim > 20, ]
-high_crim
+#high_crim
 
 # get the census tracts with the highest tax rates
 high_tax <- Boston[Boston$tax > 600, ]
-high_tax
+#high_tax
 
 # get the census tracts with the highest pupil-teacher ratios
 high_ptratio <- Boston[Boston$ptratio > 20, ]
-high_ptratio
+#high_ptratio
 
 # get the range of each predictor
-range(Boston$crim)
-range(Boston$tax)
-range(Boston$ptratio)
+crim_range <- range(Boston$crim)
+tax_range <- range(Boston$tax)
+ptratio_range <- range(Boston$ptratio)
+
+# plotting grid 2 x 3
+par(mfrow=c(2, 2)) 
+
+# density plot
+plot(density(Boston$crim), col = "lightblue", lwd = 2, 
+     main = "Distribution of Crime Rates", 
+     xlab = "Crime Rate (per capita)", ylab = "Density")
+# line to mark a threshold for high crime rate
+abline(v = 20, col = "red", lwd = 2, lty = 2)
+
+# boxplot of tax rates
+boxplot(Boston$tax, col = "lightgreen", 
+        main = "Distribution of Tax Rates",
+        cex.names = 0.7,
+        ylab = "Tax Rate (per $10k of prop. val.)")
+# threash hold for high tax rate
+abline(h = 600, col = "red", lwd = 2, lty = 2)
+
+# plot of pupil-teacher ratios vs. crime rates
+plot(Boston$ptratio, Boston$crim, col = "orange", 
+     main = "Pupil-Teacher Ratios vs. Crime Rates",
+     xlab = "Pupil-Teacher Ratio", ylab = "Crime Rate (per capita)")
+
+# line to mark a threshold for high pupil-teacher ratio
+abline(v = 20, col = "red", lwd = 2, lty = 2)
 ```
 
-- Yes, there are census tracts with particularly high crime rates, tax rates and pupil-teacher ratios. For instance, census tracts with crime rates greater than 20 have particularly high crime rates. Census tracts with tax rates greater than 600 have particularly high tax rates. Census tracts with pupil-teacher ratios greater than 20 have particularly high pupil-teacher ratios. The range of each predictor is as follows: the per capita crime rate ranges from 0 to 89.0, the full-value property-tax rate per $10,000 ranges from 187 to 711, and the pupil-teacher ratio by town ranges from 12.6 to 22.0.
+
+
+- Yes, there are census tracts with particularly high crime rates, tax rates and pupil-teacher ratios. For instance, census tracts with crime rates greater than 20 have particularly high crime rates although these appear to be outlier cases suggesting that crime might be occuring disproportionately / is concentrated in crtain tracs. The crime rate in the dataset ranges from 0.00632 to 88.98, indicating a substantial disparity. Census tracts with tax rates greater than 600 have particularly high tax burdens. The tax rate varies between 187 and 711 per $10,000 of property value. Continuing census tracts with a pupil-teacher ratio (ptratio) above 20 experience relatively high student-to-teacher ratios, which could indicate lower school resources. The pupil-teacher ratio spans from 12.6 to 22.0 across the dataset.  To recap the range of each predictor is as follows: the per capita crime rate ranges from 0 to 89.0, the full-value property-tax rate per \$10,000 ranges from 187 to 711, and the pupil-teacher ratio by town ranges from 12.6 to 22.0.
+
+
+
 
 (e) How many of the census tracts in this data set bound the Charles river?
 
@@ -417,7 +474,6 @@ num_tracts_river
 ```{r}
 # get the median and store it 
 median_ptratio <- median(Boston$ptratio)
-
 median_ptratio
 ```
 
@@ -444,25 +500,23 @@ range(Boston$rad)
 range(Boston$age)
 
 
-
 ```
 
-- The census tract with the lowest median value of owner-occupied homes is tract 399. The median value of owner-occupied homes in this tract is 5.0. The values of the other predictors for this census tract are as follows: per capita crime rate is 38.3518, the proportion of lower status of the population is 30.59%, the full-value property-tax rate per $10,000 is 666, the pupil-teacher ratio by town is 20.2, the nitric oxides concentration is 0.693, the proportion of non-retail business acres per town is 18.1, the index of accessibility to radial highways is 24, the proportion of older homes is 96.1%. These values are at the extreme end of the range for each predictor. For instance, the per capita crime rate is at the upper end of the range, the proportion of lower status of the population is at the upper end of the range, the full-value property-tax rate per $10,000 is at the upper end of the range, the pupil-teacher ratio by town is at the upper end of the range, the nitric oxides concentration is at the upper end of the range, the proportion of non-retail business acres per town is at the upper end of the range, the index of accessibility to radial highways is at the upper end of the range, and the proportion of older homes is at the upper end of the range.
+- The census tract with the lowest median value of owner-occupied homes is row index 399. The median value of owner-occupied homes in this tract is 5.0. The values of the other predictors for this census tract are as follows: per capita crime rate is 38.3518, the proportion of lower status of the population is 30.59%, the full-value property-tax rate per \$10,000 is 666, the pupil-teacher ratio by town is 20.2, the nitric oxides concentration is 0.693, the proportion of non-retail business acres per town is 18.1, the index of accessibility to radial highways is 24, the proportion of older homes is 96.1%. These values are at the extreme end of the range for each predictor. For instance, the per capita crime rate, proportion of lower status of the population, the full-value property-tax rate per \$10,000, pupil-teacher ratio by town is at the upper end of the range, the nitric oxides concentration is at the upper end of the range, the proportion of non-retail business acres per town is at the upper end of the range, the index of accessibility to radial highways is at the upper end of the range, and the proportion of older homes is at the upper end of the range. This suggests that this census tract is in a particularly disadvantaged area with high crime rates, high tax rates, and poor school resources.
 
 (h) In this data set, how many of the census tracts average more than seven rooms per dwelling? More than eight rooms per dwelling? Comment on the census tracts that average more than eight rooms per dwelling. 
 ```{r}
+# get tracts with rm > 7 and rm > 8
+num_seven <- sum(Boston$rm > 7)   # 170 tracts
+num_eight <- sum(Boston$rm > 8)   # 7 tracts
 
-# get the num of census tracts that average more than seven rooms per dwelling
-num_tracts_seven <- length(Boston[Boston$rm > 7, ]$rm)
-
-# get the census tracts that average more than eight rooms per dwelling
+# analyze tracts with rm > 8
 tracts_eight <- Boston[Boston$rm > 8, ]
-tracts_eight
+summary(tracts_eight)  # Summary of these tracts
 
-
-
+# comp medv to the overall median
+median(Boston$medv)            # ovrall median: 21.2
+median(tracts_eight$medv)       
 ```
 
-
-
-
+- These census tracts would generally correspond to affluent neighborhoods with larger homes i.e more rooms. Given that the number of rooms per dwelling (rm) is positively correlated with median home value (medv), these tracts are likely to have higher property values. They may also have lower crime rates and better school resources, as these factors are often associated with wealthier areas.
