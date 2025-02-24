@@ -51,7 +51,7 @@ $$
 X = \begin{bmatrix}
 1 \\ x_1 \\ x_2 \\ x_3 \\ x_4 \\ x_5 \\
 \end{bmatrix} = \begin{bmatrix}
-1 \\ \text{GPA}_1 \\ \text{IQ}_1 \\ \text{Level}_1 \\ (\text{GPA} \times \text{IQ})_1 \\ (\text{GPA} \times \text{Level})_1 \\
+1 \\ \text{GPA} \\ \text{IQ} \\ \text{Level} \\ (\text{GPA} \times \text{IQ}) \\ (\text{GPA} \times \text{Level}) \\
 \end{bmatrix}, \, \hat{\beta} = \begin{bmatrix}
 50 \\ 20 \\ 0.07 \\ 35 \\ 0.01 \\ -10
 \end{bmatrix}
@@ -74,29 +74,31 @@ $$
 For fixed value of IQ, GPA, and letting Level = 1 for College, 0 for High School. the salary of a college graduate is given by
 $$
 \begin{aligned}
-Y &= 50 + 20 (\text{GPA}_1) + 0.07 (\text{IQ}_1) + 35 (\text{Level}_1) + 0.01 (\text{GPA} \times \text{IQ})_1 - 10 (\text{GPA} \times \text{Level})_1 \\
-&= 50 + 20 (\text{GPA}_1) + 0.07 (\text{IQ}_1) + 35(1) + 0.01 (\text{GPA} \times \text{IQ})_1 - 10(\text{GPA} \times \text{Level})_1 
+Y &= 50 + 20 (\text{GPA}) + 0.07 (\text{IQ}) + 35 (\text{Level}) + 0.01 (\text{GPA} \times \text{IQ}) - 10 (\text{GPA} \times \text{Level}) \\
+&= 50 + 20 (\text{GPA}) + 0.07 (\text{IQ}) + 35(1) + 0.01 (\text{GPA} \times \text{IQ}) - 10(\text{GPA} \times \text{Level})
 \end{aligned}
 $$ 
 
 and for high school graduates we have 
 $$
 \begin{aligned}
-Y &= 50 + 20 (\text{GPA}_1) + 0.07 (\text{IQ}_1) + 35 (0) + 0.01 (\text{GPA} \times \text{IQ})_1 - 10 (\text{GPA} \times \text{Level})_1 \\
-&= 50 + 20 (\text{GPA}_1) + 0.07 (\text{IQ}_1) + 0.01 (\text{GPA} \times \text{IQ})_1 - 10 (\text{GPA} \times \text{Level})_1 
+Y &= 50 + 20 (\text{GPA}) + 0.07 (\text{IQ}) + 35 (0) + 0.01 (\text{GPA} \times \text{IQ}) - 10 (\text{GPA} \times \text{Level}) \\
+&= 50 + 20 (\text{GPA}) + 0.07 (\text{IQ}) + 0.01 (\text{GPA} \times \text{IQ}) - 10 (\text{GPA} \times \text{Level})
 \end{aligned}
 $$ 
 
 
 We can then equate these equations to find 
-$$
+$$ \tiny
 \begin{aligned}
-50 + 20 (\text{GPA}_1) + 0.07 (\text{IQ}_1) + 35 + 0.01 (\text{GPA} \times \text{IQ})_1 - 10 (\text{GPA} \times \text{Level})_1 &= 50 + 20 (\text{GPA}_1) + 0.07 (\text{IQ}_1) + 0.01 (\text{GPA} \times \text{IQ})_1  \\
-50 -50 + 20 (\text{GPA}_1) - 20 (\text{GPA}_1) + 0.07 (\text{IQ}_1) - 0.07 (\text{IQ}_1) + 35 + 0.01 (\text{GPA} \times \text{IQ})_1 - 0.01 (\text{GPA} \times \text{IQ})_1 &=  10 (\text{GPA} \times \text{Level})_1 \\
-35 &= 10 (\text{GPA} \times \text{Level})_1 \\
-3.5 = (\text{GPA} \times \text{Level})_1
-\end{aligned}
+50 + 20 (\text{GPA}) + 0.07 (\text{IQ}) + 35 + 0.01 (\text{GPA} \times \text{IQ}) - 10 (\text{GPA} \times \text{Level}) &= 50 + 20 (\text{GPA}) + 0.07 (\text{IQ}) + 0.01 (\text{GPA} \times \text{IQ}) \\
+50 -50 + 20 (\text{GPA}) - 20 (\text{GPA}) + 0.07 (\text{IQ}) - 0.07 (\text{IQ}) + 35 + 0.01 (\text{GPA} \times \text{IQ}) - 0.01 (\text{GPA} \times \text{IQ}) &=  10 (\text{GPA} \times \text{Level}) \\
+35 &= 10 (\text{GPA} \times \text{Level}) \\
+3.5 = (\text{GPA} \times \text{Level})
+\end{aligned} 
 $$ 
+
+So for a GPA of 3.5 or higher, college graduates earn more than high school graduates. So the correct answer is iii. For a fixed value of IQ and GPA, high school graduates earn more, on average, than college graduates provided that the GPA is high enough.
 
 (b) Predict the salary of a college graduate with IQ of 110 and a GPA of 4.0.
 
