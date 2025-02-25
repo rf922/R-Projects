@@ -64,7 +64,7 @@ summary(lm.fit)
 ```{r}
 
 plot(horsepower,mpg)
-abline(lm.fit)
+abline(lm.fit, col="cyan")
 
 ```
 3) Produce diagnostic plots of the least square regression fit. Comment on any problems you see with the fit.
@@ -115,5 +115,52 @@ error <- rnorm(n, mean=0, sd=0.1)
 ```{r}
 
 y <- f(x) + error
+print(y)
 
 ```
+
+6)   Create a function knn.pred with two augments: K and an observation x0. This function will fit a KNN regression with parameter K based on (x,y) and predict response for the observation x0. Test your function using K=5 and x0=1.
+
+```{r}
+
+knn.pred <- function(K, x0){
+  return(knn.reg(x, y, x0, K))
+}
+
+knn.pred(5, 1)
+
+
+```
+
+7)   Use the function you created in 6) to calculate the training MSE for the data (x,y) we have. (Set K=5)
+
+```{r}
+
+knn.pred(5, x)
+
+```
+
+8)   Use your code in 7) to create a function with one argument K. The output is the training MSE of data.
+
+```{r}
+
+train.MSE <- function(K){
+  return(mean((y - knn.pred(K, x))^2))
+}
+```
+
+9)   Make a plot to see the relation between 1/K and the training MSE.
+
+```{r}
+
+K <- seq(1, 20, 1)
+train_MSE <- sapply(K, train.MSE)
+plot(1/K, train_MSE, type="l", col="green", xlab="1/K", ylab="Training MSE")
+
+``` 
+ 
+Suppose we have a test data set where x_test=c(0.05,0.15,…,1.45), generate random error error_test and y_test using the true relationship. Can you make a plot to see the relationship between 1/K and the test MSE?
+
+```{r}
+
+
