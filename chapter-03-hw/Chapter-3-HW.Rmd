@@ -102,6 +102,8 @@ So for a GPA of 3.5 or higher, college graduates earn more than high school grad
 
 (b) Predict the salary of a college graduate with IQ of 110 and a GPA of 4.0.
 
+
+
 (c) True or false: Since the coefficient for the GPA/IQ interaction term is very small, there is very little evidence of an interaction effect. Justify your answer.
 
 
