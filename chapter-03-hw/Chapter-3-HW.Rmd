@@ -168,6 +168,12 @@ False, since the value of the coefficient is not considered when determining the
 
 (a) Fit a multiple regression model to predict Sales using Price, Urban, and US.
 
+```{r}
+data(Carseats)
+summary(Carseats)
+fit <- lm(Sales ~ Price + Urban + US, data = Carseats)
+summary(fit)
+```
 
 (b) Provide an interpretation of each coefficient in the model. Be careful—some of the variables in the model are qualitative!
 

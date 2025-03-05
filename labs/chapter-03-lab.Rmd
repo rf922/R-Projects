@@ -13,8 +13,8 @@ library(ISLR)
 ```
 
 
-#Math 448 Chapter 03 Lab
-##This question involves the use of simple linear regression on the Auto data.
+# Math 448 Chapter 03 Lab
+## This question involves the use of simple linear regression on the Auto data.
 1) Perform regression with mpg as the response and horsepower as the predictor.Comment the output. For example
 
         I.     	Any relationship between the predictor and the response. 
@@ -99,10 +99,10 @@ n <- length(x)
  R: set.seed(448)
  Python: import numpy as np; np.random.seed(448)
  
- ```{r}
- set.seed(448)
- 
- ```
+```{r}
+set.seed(448)
+
+```
 4)   Generate n random numbers from normal distribution with mean 0 and standard deviation 0.1 and save it as error.
 
 ```{r}
@@ -124,11 +124,27 @@ print(y)
 ```{r}
 
 knn.pred <- function(K, x0){
-  return(knn.reg(x, y, x0, K))
+    
+    # custom distance function
+    dist <- function(x, y) {
+        return(abs(x - y))
+    }
+    
+    # find the K nearest neighbors
+    knn <- function(x, y, x0, K) {
+        distances <- dist(x, x0)
+        neighbors <- order(distances)[1:K]
+        return(mean(y[neighbors]))
+    }
+    
+    # fit KNN regression
+    y_pred <- knn(x, y, x0, K)
+    
+    return(y_pred)
+    
 }
 
 knn.pred(5, 1)
-
 
 ```
 
@@ -136,7 +152,11 @@ knn.pred(5, 1)
 
 ```{r}
 
-knn.pred(5, x)
+mse <- function(K) {
+  y_pred <- sapply(x, knn.pred, K=K)
+  return(mean((y - y_pred)^2))
+}
+mse(5)
 
 ```
 
@@ -144,9 +164,12 @@ knn.pred(5, x)
 
 ```{r}
 
-train.MSE <- function(K){
-  return(mean((y - knn.pred(K, x))^2))
+mse <- function(K) {
+  y_pred <- sapply(x, knn.pred, K=K)
+  return(mean((y - y_pred)^2))
 }
+
+
 ```
 
 9)   Make a plot to see the relation between 1/K and the training MSE.
@@ -154,8 +177,9 @@ train.MSE <- function(K){
 ```{r}
 
 K <- seq(1, 20, 1)
-train_MSE <- sapply(K, train.MSE)
-plot(1/K, train_MSE, type="l", col="green", xlab="1/K", ylab="Training MSE")
+mse_values <- sapply(K, mse)
+plot(1/K, mse_values, xlab="1/K", ylab="Training MSE", main="Training MSE vs 1/K")
+
 
 ``` 
  
@@ -163,4 +187,18 @@ Suppose we have a test data set where x_test=c(0.05,0.15,…,1.45), generate ran
 
 ```{r}
 
+x_test <- seq(0.05, 1.45, 0.1)
+error_test <- rnorm(length(x_test), mean=0, sd=0.1)
+y_test <- f(x_test) + error_test
+mse_test <- function(K) {
+  y_pred_test <- sapply(x_test, knn.pred, K=K)
+  return(mean((y_test - y_pred_test)^2))
+}
+K_test <- seq(1, 20, 1)
+mse_test_values <- sapply(K_test, mse_test)
+plot(1/K_test, mse_test_values, xlab="1/K", ylab="Test MSE", main="Test MSE vs 1/K")
+
+
+
+```
 
