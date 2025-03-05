@@ -177,38 +177,69 @@ summary(fit)
 
 (b) Provide an interpretation of each coefficient in the model. Be careful—some of the variables in the model are qualitative!
 
+- The coefficient for Price is -0.0545, which means that for a one unit increase in Price, Sales decrease by 0.0545 units. The coefficient for UrbanYes is -0.0219, which means that for a store in an urban area, Sales decrease by 0.0219 units. The coefficient for USYes is 1.2006, which means that for a store in the US, Sales increase by 1.2006 units. 
+
 
 (c) Write out the model in equation form, being careful to handle the qualitative variables properly.
+
+$$
+\begin{aligned}
+\text{Sales} &= \beta_0 + \beta_1 \times \text{Price} + \beta_2 \times \text{UrbanYes} + \beta_3 \times \text{USYes} + \epsilon \\
+\text{Sales} &= 13.0435 - 0.0545 \times \text{Price} - 0.0219 \times \text{UrbanYes} + 1.2006 \times \text{USYes} + \epsilon
+\end{aligned}
+$$
 
 
 (d) For which of the predictors can you reject the null hypothesis H0 : $\beta$j = 0?
 
+- The p-values for Price and USYes are less than 0.05, so the null hypothesis can be rejected for these predictors. The p-value for UrbanYes is greater than 0.05, so the null hypothesis cannot be rejected for this predictor.
+
 
 (e) On the basis of your response to the previous question, fit a smaller model that only uses the predictors for which there is evidence of association with the outcome.
+
+```{r}
+fit2 <- lm(Sales ~ Price + US, data = Carseats)
+summary(fit2)
+```
 
 
 (f) How well do the models in (a) and (e) fit the data?
 
+- The R-squared value for the model in (a) is 0.2393, and the R-squared value for the model in (e) is 0.2393. This means that the models in (a) and (e) explain 23.93% of the variance in Sales. The models in (a) and (e) fit the data equally well.
+
 
 (g) Using the model from (e), obtain 95 % confidence intervals for the coefficient(s).
+
+```{r}
+confint(fit2)
+
+```
 
 
 (h) Is there evidence of outliers or high leverage observations in the model from (e)?
 
-
-
 ```{r}
-summary(cars)
-plot(cars)
+plot(fit2, which = 4)
 ```
+
+- There are no high leverage observations in the model from (e). There are a few outliers, but they do not appear to have a significant impact on the model.
+
 
 #### Exercise 13: In this exercise you will create some simulated data and will fit simple linear regression models to it. Make sure to use set.seed(1) prior to starting part (a) to ensure consistent results.
 
 
 (a) Using the rnorm() function, create a vector, x, containing 100 observations drawn from a N (0, 1) distribution. This represents a feature, X.
 
+```{r}
+set.seed(1)
+x <- rnorm(100, mean = 0, sd = 1)
+```
 
 (b) Using the rnorm() function, create a vector, eps, containing 100 observations drawn from a N (0, 0.25) distribution-a normal distribution with mean zero and variance 0.25.
+
+```{r}
+eps <- rnorm(100, mean = 0, sd = 0.25)
+```
 
 
 (c) Using x and eps, generate a vector y according to the model
@@ -217,9 +248,18 @@ plot(cars)
 
 What is the length of the vector y? What are the values of $$\beta_0$$ and $$\beta_1$$ in this linear model?
 
+```{r}
+y <- -1 + 0.5*x + eps
+length(y)
+```
+
+- The length of the vector y is 100. The values of $$\beta_0$$ and $$\beta_1$$ in this linear model are -1 and 0.5, respectively.
 
 (d) Create a scatterplot displaying the relationship between x and y. Comment on what you observe.
 
+```{r}
+plot(x, y)
+```
 
 (e) Fit a least squares linear model to predict y using x. Comment on the model obtained. How do $\hat{\beta}_0$ and $\hat{\beta}_1$  compare to $\hat{\beta}_0$ and $\hat{\beta}_1$ ?
 
