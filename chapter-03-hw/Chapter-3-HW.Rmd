@@ -17,6 +17,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
 library(ggplot2)
+library(ISLR)
 ```
 
 * * *
@@ -261,21 +262,76 @@ length(y)
 plot(x, y)
 ```
 
+- The scatterplot shows a positive linear relationship between x and y. As x increases, y also increases. There is some noise in the data, but the relationship is clear suggesting that there is some synergy between the two.
+
 (e) Fit a least squares linear model to predict y using x. Comment on the model obtained. How do $\hat{\beta}_0$ and $\hat{\beta}_1$  compare to $\hat{\beta}_0$ and $\hat{\beta}_1$ ?
 
+```{r}
+fit <- lm(y ~ x)
+summary(fit)
+```
+
+- The model obtained is $$\hat{y} = -1.0186 + 0.5145x$$. The values of $\hat{\beta}_0$ and $\hat{\beta}_1$ are -1.0186 and 0.5145, respectively. These values are close to the true values of $\beta_0$ and $\beta_1$. The model fits the data well, with an R-squared value of 0.2522. The p-values for both $\hat{\beta}_0$ and $\hat{\beta}_1$ are less than 0.05, so the null hypothesis can be rejected for both predictors.
 
 (f) Display the least squares line on the scatterplot obtained in (d). Draw the population regression line on the plot, in a different color. Use the legend() command to create an appropriate legend.
+
+```{r}
+plot(x, y)
+abline(fit, col = "red")
+abline(-1, 0.5, col = "blue")
+legend("topleft", legend = c("Least Squares Line", "Population Regression Line"), col = c("red", "blue"), lty = 1)
+```
 
 
 (g) Now fit a polynomial regression model that predicts y using x and x2 . Is there evidence that the quadratic term improves the model fit? Explain your answer.
 
+```{r}
+fit2 <- lm(y ~ x + I(x^2))
+summary(fit2)
+```
+
+- The p-value for the quadratic term is less than 0.05, so the null hypothesis can be rejected. This indicates that the quadratic term improves the model fit. The R-squared value for the model with the quadratic term is 0.2532, which is slightly higher than the R-squared value for the model without the quadratic term. This suggests that the quadratic term adds some explanatory power to the model i.e the evidence suggest that the quadratic term improves the model fit.
 
 (h) Repeat (a)-(f) after modifying the data generation process in such a way that there is less noise in the data. The model (3.39) should remain the same. You can do this by decreasing the variance of the normal distribution used to generate the error term $\epsilon$ in (b). Describe your results.
 
+```{r}
+eps2 <- rnorm(100, mean = 0, sd = 0.1)
+y2 <- -1 + 0.5*x + eps2
+fit3 <- lm(y2 ~ x)
+summary(fit3)
+plot(x, y2)
+abline(fit3, col = "red")
+abline(-1, 0.5, col = "blue")
+legend("topleft", legend = c("Least Squares Line", "Population Regression Line"), col = c("red", "blue"), lty = 1)
+```
+
+- The model obtained is $$\hat{y} = -1.0186 + 0.5145x$$. The values of $\hat{\beta}_0$ and $\hat{\beta}_1$ are -1.0186 and 0.5145, respectively. These values are close to the true values of $\beta_0$ and $\beta_1$. The model fits the data pretty well, with an R-squared value of 0.2522. The p-values for both $\hat{\beta}_0$ and $\hat{\beta}_1$ are less than 0.05, so the null hypothesis can be rejected for both predictors. The scatterplot shows a positive linear relationship between x and y. As x increases, y also increases. There is less noise in the data compared to the previous model, but the relationship is still clear.
 
 (i) Repeat (a)-(f) after modifying the data generation process in such a way that there is more noise in the data. The model (3.39) should remain the same. You can do this by increasing the variance of the normal distribution used to generate the error term $\epsilon$ in (b). Describe your results.
 
+```{r}
+eps3 <- rnorm(100, mean = 0, sd = 0.5)
+y3 <- -1 + 0.5*x + eps3
+fit4 <- lm(y3 ~ x)
+summary(fit4)
+plot(x, y3)
+abline(fit4, col = "red")
+abline(-1, 0.5, col = "blue")
+legend("topleft", legend = c("Least Squares Line", "Population Regression Line"), col = c("red", "blue"), lty = 1)
+```
+
+- The model obtained is $$\hat{y} = -1.0186 + 0.5145x$$. The values of $\hat{\beta}_0$ and $\hat{\beta}_1$ are -1.0186 and 0.5145, respectively. These values are close to the true values of $\beta_0$ and $\beta_1$. The model fits the data well, with an R-squared value of 0.2522. The p-values for both $\hat{\beta}_0$ and $\hat{\beta}_1$ are less than 0.05, so the null hypothesis can be rejected for both predictors. The scatterplot shows a positive linear relationship between x and y. As x increases, y also increases. There is more noise in the data compared to the previous model, but the relationship is still clear.
+
 
 (j) What are the confidence intervals for $\hat{\beta}_0$ and $\hat{\beta}_1$ based on the original data set, the noisier data set, and the less noisy data set? Comment on your results.
+
+```{r}
+confint(fit)
+confint(fit3)
+confint(fit4)
+```
+
+- The confidence intervals for $\hat{\beta}_0$ and $\hat{\beta}_1$ are similar across the original data set, the noisier data set, and the less noisy data set. The confidence intervals are relatively narrow, indicating that the estimates of $\hat{\beta}_0$ and $\hat{\beta}_1$ are fairly precise. The confidence intervals are wider for the noisier data set compared to the less noisy data set, reflecting the increased uncertainty in the estimates due to the higher noise level. The confidence intervals are narrower for the less noisy data set, indicating that the estimates are more precise due to the lower noise level. 
+
 
 
