@@ -26,6 +26,7 @@ library(ISLR)
 
 
 #### Exercise 1: Describe the null hypotheses to which the p-values given in Table 3.4 correspond. Explain what conclusions you can draw based on these p-values. Your explanation should be phrased in terms of sales, TV, radio, and newspaper, rather than in terms of the coefficients of the linear model.?
+
 - The null hypothesis is that the variables TV, radio and newspaper have no effect on sales. From the table the p-values corresponding to TV and radio are less than 0.0001 indicating that the null hypothesis can be rejected. The p-value for newspaper is 0.8599 which is greater than 0.05, so the null hypothesis cannot be rejected. This would draw us to conclude that TV and radio have a significant effect on sales, while newspaper does not.
 
 #### Exercise 3: Suppose we have a data set with five predictors, X1 = GPA, X2 = IQ, X3 = Level (1 for College and 0 for High School), X4 = Interaction between GPA and IQ, and X5 = Interaction between GPA and Level. The response is starting salary after graduation (in thousands of dollars). Suppose we use least squares to fit the model, and get
@@ -46,23 +47,22 @@ iii. For a fixed value of IQ and GPA, high school graduates earn more, on averag
 
 iv. For a fixed value of IQ and GPA, college graduates earn more, on average, than high school graduates provided that the GPA is high enough.
 
--From the problem :
+- From the problem :
 
 $$
 \bar{X} =\begin{bmatrix}
-1 \\ \bar{x_1} \\ \bar{x_2} \\ \bar{x_3} \\ \bar{x_4} \\ \bar{x_5} \\
+1 \\ \bar{x_1} \\ \bar{x_2} \\ \bar{x_3} \\ \bar{x_4} \\ \bar{x_5}
 \end{bmatrix} =  \begin{bmatrix}
-1 \\ \bar{\text{GPA}} \\ \bar{\text{IQ}} \\ \bar{\text{Level}} \\ (\bar{\text{GPA}} \times \bar{\text{IQ}}) \\ (\bar{\text{GPA}} \times \bar{\text{Level}}) \\
+1 \\ \bar{\text{GPA}} \\ \bar{\text{IQ}} \\ \bar{\text{Level}} \\ (\bar{\text{GPA}} \times \bar{\text{IQ}}) \\ (\bar{\text{GPA}} \times \bar{\text{Level}}) 
 \end{bmatrix}, \,
-
 X =\begin{bmatrix}
 1 \\ x_1 \\ x_2 \\ x_3 \\ x_4 \\ x_5 \\
 \end{bmatrix} =  \begin{bmatrix}
-1 \\ \text{GPA} \\ \text{IQ} \\ \text{Level} \\ (\text{GPA} \times \text{IQ}) \\ (\text{GPA} \times \text{Level}) \\
+1 \\ \text{GPA} \\ \text{IQ} \\ \text{Level} \\ (\text{GPA} \times \text{IQ}) \\ (\text{GPA} \times \text{Level}) 
 \end{bmatrix}  , \, \hat{\beta} = \begin{bmatrix}
 50 \\ 20 \\ 0.07 \\ 35 \\ 0.01 \\ -10
 \end{bmatrix}
-$$ 
+$$
 Now $Y$ is given by 
 
 $$
@@ -76,7 +76,6 @@ Y &= X^T \hat{\beta} \\
 \end{bmatrix} \\
 &= [\, 50 + 20(\text{GPA}) + 0.07(\text{IQ}) + 35(\text{Level}) + 0.01(\text{GPA} \times \text{IQ}) - 10(\text{GPA} \times \text{Level}) \,]
 \end{aligned}
-
 $$
 
 For fixed value of IQ, GPA, and letting Level = 1 for College, 0 for High School. the salary of a college graduate is given by
@@ -100,7 +99,6 @@ Y &= \bar{X}^T \hat{\beta} \\
 \end{bmatrix} \\
 &= [\, 50 + 20( \bar{\text{GPA}} ) + 0.07( \bar{\text{IQ}}) + 35( \bar{\text{Level}}) + 0.01(\bar{\text{GPA}} \times \bar{\text{IQ})} - 10(\bar{\text{GPA}} \times \bar{\text{Level}}) \,]
 \end{aligned}
-
 $$
 
 $$
@@ -109,37 +107,41 @@ Y &= 50 + 20( \bar{\text{GPA}} ) + 0.07( \bar{\text{IQ}}) + 35( \bar{\text{Level
 &= 50 + 20 (\bar{\text{GPA}}) + 0.07 (\bar{\text{IQ}}) + 35(0) + 0.01 (\bar{\text{GPA}} \times \bar{\text{IQ}}) - 10 (\bar{\text{GPA}} \times 0) \\
 &= 50 + 20 (\bar{\text{GPA}}) + 0.07 (\bar{\text{IQ}}) + 0.01 (\bar{\text{GPA}} \times \bar{\text{IQ}})
 \end{aligned}
-
 $$ 
 
 
 We can then equate these equations to find the conditions under which college graduates earn more than high school graduates. With $\text{Level} = 0, \, \bar{\text{Level}} = 0$ and $\text{GPA}, \bar{\text{GPA}}$ and $\text{IQ}, \bar{\text{IQ}}$ being the same fixed values, we have
-$$ 
-
+$$
+{\small
 \begin{aligned}
 50 + 20 (\text{GPA}) + 0.07 (\text{IQ}) + 35 + 0.01 (\text{GPA} \times \text{IQ}) - 10 (\text{GPA} \times \text{Level}) &= 50 + 20 (\bar{\text{GPA}}) + 0.07 (\bar{\text{IQ}}) + 0.01 (\bar{\text{GPA}} \times \bar{\text{IQ}}) \\
 50 -50 + 20 (\text{GPA} - \bar{\text{GPA}}) + 0.07 ( \text{IQ} -  \bar{\text{IQ}}) + 35 + 0.01 (\text{GPA} \times \text{IQ}) - (\bar{\text{GPA}} \times \bar{\text{IQ}}) &=  10 (\text{GPA} \times \text{Level})\\
 35 &= 10 (\text{GPA} \times \text{Level}) \\
 3.5 &= (\text{GPA} \times \text{Level})
-\end{aligned} 
+\end{aligned} }
 $$ 
 
 So for a GPA of 3.5 or higher, college graduates earn more than high school graduates. So the correct answer is iii. For a fixed value of IQ and GPA, high school graduates earn more, on average, than college graduates provided that the GPA is high enough.
 
 (b) Predict the salary of a college graduate with IQ of 110 and a GPA of 4.0.
 
-Continuing from before we have 
+- Continuing from before we have 
 $$
-Y = X^T \hat{\beta} \\
-\text{Where}, \\
+Y = X^T \hat{\beta}
+$$
+
+
+Where, 
+$$
 X =\begin{bmatrix}
 1 \\ x_1 \\ x_2 \\ x_3 \\ x_4 \\ x_5 \\
 \end{bmatrix} =  \begin{bmatrix}
-1 \\ \text{GPA} \\ \text{IQ} \\ \text{Level} \\ (\text{GPA} \times \text{IQ}) \\ (\text{GPA} \times \text{Level}) \\
+1 \\ \text{GPA} \\ \text{IQ} \\ \text{Level} \\ (\text{GPA} \times \text{IQ}) \\ (\text{GPA} \times \text{Level}) 
 \end{bmatrix}  , \, \hat{\beta} = \begin{bmatrix}
 50 \\ 20 \\ 0.07 \\ 35 \\ 0.01 \\ -10
 \end{bmatrix}
 $$
+
 So then 
 
 $$
@@ -159,7 +161,8 @@ $$
 So the salary of a college graduate with IQ of 110 and a GPA of 4.0 is predicted to be 137.1.
 
 (c) True or false: Since the coefficient for the GPA/IQ interaction term is very small, there is very little evidence of an interaction effect. Justify your answer.
-False, since the value of the coefficient is not considered when determining the statistical significance of a variable. Instead if our goal is to determine the interaction effect’s significance we would have to find and inspect the associatied p-value.
+
+- False, since the value of the coefficient is not considered when determining the statistical significance of a variable. Instead if our goal is to determine the interaction effect’s significance we would have to find and inspect the associatied p-value.
 
 * * *
 
@@ -171,14 +174,16 @@ False, since the value of the coefficient is not considered when determining the
 
 ```{r}
 data(Carseats)
-summary(Carseats)
+#summary(Carseats)
+
+#fitting the model using price Urban and US 
 fit <- lm(Sales ~ Price + Urban + US, data = Carseats)
 summary(fit)
 ```
 
 (b) Provide an interpretation of each coefficient in the model. Be careful—some of the variables in the model are qualitative!
 
-- The coefficient for Price is -0.0545, which means that for a one unit increase in Price, Sales decrease by 0.0545 units. The coefficient for UrbanYes is -0.0219, which means that for a store in an urban area, Sales decrease by 0.0219 units. The coefficient for USYes is 1.2006, which means that for a store in the US, Sales increase by 1.2006 units. 
+- The coefficient for Price is -0.0545, which means that for a one unit increase in Price, Sales decrease by 0.0545 units. Our constant of 13.04347 suggests that we start at a baseline of approximately 13. The coefficient for UrbanYes is -0.0219, which means that for a store in an urban area, Sales decrease by 0.0219 units. The coefficient for USYes is 1.2006, which in essence means that for a store in the US, Sales increase by 1.2006 units i.e if a car seat model is sold in the US the coefficient suggests we gain about 1.2 in sales. 
 
 
 (c) Write out the model in equation form, being careful to handle the qualitative variables properly.
@@ -191,14 +196,15 @@ $$
 $$
 
 
-(d) For which of the predictors can you reject the null hypothesis H0 : $\beta$j = 0?
+(d) For which of the predictors can you reject the null hypothesis $H_0$ : $\beta_j$ = 0?
 
-- The p-values for Price and USYes are less than 0.05, so the null hypothesis can be rejected for these predictors. The p-value for UrbanYes is greater than 0.05, so the null hypothesis cannot be rejected for this predictor.
+- The p-values for Price and USYes are less than 0.05, so the null hypothesis can be rejected for these predictors while the p-value for UrbanYes is greater than 0.05, so the null hypothesis cannot be rejected for this predictor.
 
 
 (e) On the basis of your response to the previous question, fit a smaller model that only uses the predictors for which there is evidence of association with the outcome.
 
 ```{r}
+# adujusting the fit to reflect the ommision of Price and USYes 
 fit2 <- lm(Sales ~ Price + US, data = Carseats)
 summary(fit2)
 ```
@@ -206,7 +212,7 @@ summary(fit2)
 
 (f) How well do the models in (a) and (e) fit the data?
 
-- The R-squared value for the model in (a) is 0.2393, and the R-squared value for the model in (e) is 0.2393. This means that the models in (a) and (e) explain 23.93% of the variance in Sales. The models in (a) and (e) fit the data equally well.
+- The $R^2$ value for the model in (a) is 0.2393, and the $R^2$ value for the model in (e) is 0.2393. This means that the models in (a) and (e) explain 23.93% of the variance in Sales. The models in (a) and (e) fit the data equally well. However, its worth noting that the model in (e) fits the data slightly better than the model in (a) because it achieves the same explanatory power with fewer predictors, as reflected by its slightly higher Adjusted $R^2$ value (0.2354 for model (e) vs. 0.2335 for model (a))
 
 
 (g) Using the model from (e), obtain 95 % confidence intervals for the coefficient(s).
@@ -223,7 +229,7 @@ confint(fit2)
 plot(fit2, which = 4)
 ```
 
-- There are no high leverage observations in the model from (e). There are a few outliers, but they do not appear to have a significant impact on the model.
+- There are no high leverage observations in the model from (e). There are a few outliers, but they do not appear to have a significant impact on the model. Since residuals are fairly evenly distributed around 0 it would seem that the model is a good fit for the data.
 
 
 #### Exercise 13: In this exercise you will create some simulated data and will fit simple linear regression models to it. Make sure to use set.seed(1) prior to starting part (a) to ensure consistent results.
@@ -247,14 +253,14 @@ eps <- rnorm(100, mean = 0, sd = 0.25)
 
  $$Y = -1 + 0.5X + \epsilon.$$ 
 
-What is the length of the vector y? What are the values of $$\beta_0$$ and $$\beta_1$$ in this linear model?
+What is the length of the vector y? What are the values of $\beta_0$ and $\beta_1$ in this linear model?
 
 ```{r}
 y <- -1 + 0.5*x + eps
 length(y)
 ```
 
-- The length of the vector y is 100. The values of $$\beta_0$$ and $$\beta_1$$ in this linear model are -1 and 0.5, respectively.
+- The length of the vector y is 100. The values of $\beta_0$ and $\beta_1$ in this linear model are -1 and 0.5, respectively.
 
 (d) Create a scatterplot displaying the relationship between x and y. Comment on what you observe.
 
@@ -264,7 +270,7 @@ plot(x, y)
 
 - The scatterplot shows a positive linear relationship between x and y. As x increases, y also increases. There is some noise in the data, but the relationship is clear suggesting that there is some synergy between the two.
 
-(e) Fit a least squares linear model to predict y using x. Comment on the model obtained. How do $\hat{\beta}_0$ and $\hat{\beta}_1$  compare to $\hat{\beta}_0$ and $\hat{\beta}_1$ ?
+(e) Fit a least squares linear model to predict y using x. Comment on the model obtained. How do $\hat{\beta}_0$ and $\hat{\beta}_1$  compare to $\beta_0$ and $\beta_1$ ?
 
 ```{r}
 fit <- lm(y ~ x)
@@ -279,22 +285,27 @@ summary(fit)
 plot(x, y)
 abline(fit, col = "red")
 abline(-1, 0.5, col = "blue")
-legend("topleft", legend = c("Least Squares Line", "Population Regression Line"), col = c("red", "blue"), lty = 1)
+legend("topleft", 
+       legend = c("Least Squares Line", "Population Regression Line"),
+       col = c("red", "blue"),
+       lty = 1)
 ```
 
 
-(g) Now fit a polynomial regression model that predicts y using x and x2 . Is there evidence that the quadratic term improves the model fit? Explain your answer.
+(g) Now fit a polynomial regression model that predicts y using x and $x^2$ . Is there evidence that the quadratic term improves the model fit? Explain your answer.
 
 ```{r}
 fit2 <- lm(y ~ x + I(x^2))
 summary(fit2)
 ```
 
-- The p-value for the quadratic term is less than 0.05, so the null hypothesis can be rejected. This indicates that the quadratic term improves the model fit. The R-squared value for the model with the quadratic term is 0.2532, which is slightly higher than the R-squared value for the model without the quadratic term. This suggests that the quadratic term adds some explanatory power to the model i.e the evidence suggest that the quadratic term improves the model fit.
+- The p-value for the quadratic term is less than 0.05, so the null hypothesis can be rejected. This indicates that the quadratic term improves the model fit. The $R^2$ value for the model with the quadratic term is 0.2532, which is slightly higher than the $R^2$ value for the model without the quadratic term. This suggests that the quadratic term adds some explanatory power to the model i.e the evidence suggest that the quadratic term improves the model fit.
 
 (h) Repeat (a)-(f) after modifying the data generation process in such a way that there is less noise in the data. The model (3.39) should remain the same. You can do this by decreasing the variance of the normal distribution used to generate the error term $\epsilon$ in (b). Describe your results.
 
 ```{r}
+set.seed(1)
+x <- rnorm(100, mean = 0, sd = 1)
 eps2 <- rnorm(100, mean = 0, sd = 0.1)
 y2 <- -1 + 0.5*x + eps2
 fit3 <- lm(y2 ~ x)
@@ -302,14 +313,20 @@ summary(fit3)
 plot(x, y2)
 abline(fit3, col = "red")
 abline(-1, 0.5, col = "blue")
-legend("topleft", legend = c("Least Squares Line", "Population Regression Line"), col = c("red", "blue"), lty = 1)
+legend("topleft",
+       legend = c("Least Squares Line", "Population Regression Line"),
+       col = c("red", "blue"),
+       lty = 1)
+
 ```
 
-- The model obtained is $$\hat{y} = -1.0186 + 0.5145x$$. The values of $\hat{\beta}_0$ and $\hat{\beta}_1$ are -1.0186 and 0.5145, respectively. These values are close to the true values of $\beta_0$ and $\beta_1$. The model fits the data pretty well, with an R-squared value of 0.2522. The p-values for both $\hat{\beta}_0$ and $\hat{\beta}_1$ are less than 0.05, so the null hypothesis can be rejected for both predictors. The scatterplot shows a positive linear relationship between x and y. As x increases, y also increases. There is less noise in the data compared to the previous model, but the relationship is still clear.
+- So reducing the $\epsilon$ from 0.25 to 0.1 yields $$\hat{y} = -1.003769 + 0.499894x$$. The values of $\hat{\beta}_0$ and $\hat{\beta}_1$ are  -1.003769 and 0.499894, respectively. These values are close to the true values of $\beta_0$ and $\beta_1$. The model fits the data pretty well, with an $R^2$  of 0.9565, The p-values for both $\hat{\beta}_0$ and $\hat{\beta}_1$ are less than 0.05, so the null hypothesis can be rejected for both predictors. The residual standard error is 0.09628, which is a lot lower than in the original model, suggesting that the model's predictions are more precise due to the reduced noise. The scatterplot shows a positive linear relationship between x and y. As x increases, y also increases. There is less noise in the data compared to the previous model and the relationship is still clear.
 
 (i) Repeat (a)-(f) after modifying the data generation process in such a way that there is more noise in the data. The model (3.39) should remain the same. You can do this by increasing the variance of the normal distribution used to generate the error term $\epsilon$ in (b). Describe your results.
 
 ```{r}
+set.seed(1)
+x <- rnorm(100, mean = 0, sd = 1)
 eps3 <- rnorm(100, mean = 0, sd = 0.5)
 y3 <- -1 + 0.5*x + eps3
 fit4 <- lm(y3 ~ x)
@@ -317,10 +334,14 @@ summary(fit4)
 plot(x, y3)
 abline(fit4, col = "red")
 abline(-1, 0.5, col = "blue")
-legend("topleft", legend = c("Least Squares Line", "Population Regression Line"), col = c("red", "blue"), lty = 1)
+legend("topleft",
+       legend = c("Least Squares Line", "Population Regression Line"),
+       col = c("red", "blue"),
+       lty = 1)
+
 ```
 
-- The model obtained is $$\hat{y} = -1.0186 + 0.5145x$$. The values of $\hat{\beta}_0$ and $\hat{\beta}_1$ are -1.0186 and 0.5145, respectively. These values are close to the true values of $\beta_0$ and $\beta_1$. The model fits the data well, with an R-squared value of 0.2522. The p-values for both $\hat{\beta}_0$ and $\hat{\beta}_1$ are less than 0.05, so the null hypothesis can be rejected for both predictors. The scatterplot shows a positive linear relationship between x and y. As x increases, y also increases. There is more noise in the data compared to the previous model, but the relationship is still clear.
+- The model obtained now is $$\hat{y} = -1.01885 + 0.49947x$$. The values of $\hat{\beta}_0$ and $\hat{\beta}_1$ are -1.01885 and 0.49947, respectively. These values are close to the true values of $\beta_0$ and $\beta_1$. Again we have a model that fits the data well, with $R^2$ of 0.4674. The p-values for both $\hat{\beta}_0$ and $\hat{\beta}_1$ are less than 0.05, so the null hypothesis can be rejected for both predictors. The scatterplot shows a positive linear relationship between x and y. As x increases, y also increases. There is more noise in the data compared to the previous model, but the relationship is still clear. Overall the model fit is less precise compared to the previous models due to the increased noise.
 
 
 (j) What are the confidence intervals for $\hat{\beta}_0$ and $\hat{\beta}_1$ based on the original data set, the noisier data set, and the less noisy data set? Comment on your results.
