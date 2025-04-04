@@ -355,4 +355,3 @@ confint(fit4)
 - The confidence intervals for $\hat{\beta}_0$ and $\hat{\beta}_1$ are similar across the original data set, the noisier data set, and the less noisy data set. The confidence intervals are relatively narrow, indicating that the estimates of $\hat{\beta}_0$ and $\hat{\beta}_1$ are fairly precise. The confidence intervals are wider for the noisier data set compared to the less noisy data set, reflecting the increased uncertainty in the estimates due to the higher noise level. The confidence intervals are narrower for the less noisy data set, indicating that the estimates are more precise due to the lower noise level. 
 
 
-

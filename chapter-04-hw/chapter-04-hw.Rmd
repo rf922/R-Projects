@@ -3,11 +3,11 @@ title: "Chapter 4 HW"
 author: "Fabiani Rafael"
 #date: "Due date of Chapter 2 HW"
 output:
+  pdf_document: default
   html_document:
     fig_height: 4
     highlight: pygments
     theme: spacelab
-  pdf_document: default
   word_document: default
 ---
 
@@ -15,7 +15,11 @@ output:
 # DO NOT ALTER CODE IN THIS CHUNK
 knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
+library(ISLR2)
 library(ggplot2)
+library(MASS)
+library(class)
+library(e1071)
 ```
 
 * * *
@@ -26,17 +30,63 @@ library(ggplot2)
 #### Exercise 3: 
 This problem relates to the QDA model, in which the observations within each class are drawn from a normal distribution with a class specific mean vector and a class specific covariance matrix. We consider the simple case where $p = 1$; i.e. there is only one feature.
 
-Suppose that we have K classes, and that if an observation belongs to the kth class then X comes from a one-dimensional normal distribution, $X $~$ N(\mu_k, \sigma_k^2)$. Recall that the density function for the one-dimensional normal distribution is given in (4.16). Prove that in this case, the Bayes classifier is not linear. Argue that it is in fact quadratic.
-Hint: For this problem, you should follow the arguments laid out in Section 4.4.1, but without making the assumption that $\sigma_1^2 = \dots = \sigma_k^2$.
+Suppose that we have K classes, and that if an observation belongs to the kth class then X comes from a one-dimensional normal distribution, $X \sim  N(\mu_k, \sigma_k^2)$. Recall that the density function for the one-dimensional normal distribution is given in (4.16). Prove that in this case, the Bayes classifier is not linear. Argue that it is in fact quadratic.
+Hint: For this problem, you should follow the arguments laid out in Section 4.4.1, but without making the assumption that $\sigma_1^2 = \dots = \sigma_k^2$. 
 
+\begin{itemize}
+\item From the problem we assum it were so that $p = 1$ and $X$ is one dimensional having a normal distribution with $X \sim N(\mu_k, \sigma_k^2)$ where the mean and covatiance are specific to the given class. The posterior probability is then 
+$$
+p_{k}(x) = \frac{\pi_{k}\frac{1}{\sqrt{2\pi}\sigma_{k}}\exp(-\frac{1}{2\sigma_{k}^{2}}(x-\mu_{k})^{2})}{\sum_{j=1}^{K}\pi_{j}\frac{1}{\sqrt{2\pi}\sigma_{j}}exp(-\frac{1}{2\sigma_{j}^{2}}(x-\mu_{j})^{2})}
+$$ 
 
-#### Exercise 6
+Now we continue to take the logarithm of the posterior probability and we then obtain
 
-Suppose we collect data for a group of students in a statistics class with variables $X1 =$ hours studied, $X2 =$ undergrad GPA, and $Y =$ receive an A. We fit a logistic regression and produce estimated coefficient, $\hat{\beta_0} = −6, \hat{\beta_1}  = 0.05, \hat{\beta_2} = 1.$
+\begin{align*}
+\log(p_{k}(x)) &= \log\left(\frac{\pi_{k}\frac{1}{\sqrt{2\pi}\sigma_{k}}\exp(-\frac{1}{2\sigma_{k}^{2}}(x-\mu_{k})^{2})}{\sum_{j=1}^{K}\pi_{j}\frac{1}{\sqrt{2\pi}\sigma_{j}}exp(-\frac{1}{2\sigma_{j}^{2}}(x-\mu_{j})^{2})}\right)  \\
+&= \log\left(\pi_{k}\frac{1}{\sqrt{2\pi}\sigma_{k}}\exp(-\frac{1}{2\sigma_{k}^{2}}(x-\mu_{k})^{2}) \right) - \log\left( \sum_{j=1}^{K}\pi_{j}\frac{1}{\sqrt{2\pi}\sigma_{j}}exp(-\frac{1}{2\sigma_{j}^{2}}(x-\mu_{j})^{2}) \right) \\
+&= \log(\frac{\pi_k}{\sqrt{2\pi}\sigma_k}) - \frac{1}{2\sigma_k^2}(x-\mu_k)^2 - \sum_{j=1}^{K}\log(\pi_j\frac{1}{\sqrt{2\pi}\sigma_j }) + \sum_{j = 1}^{K}\frac{(x - \mu_j)^2}{2\sigma^2} \\
+\end{align*}
+\end{itemize}
+
+Now since each mean and covariance is specific to the class they are distinct and non equal hence none of them will cancel out, moreover the expression $(x - \mu_j)^2$ remains yielding a discriminant which is quadratic in nature and hence the Bayes classifier is quadratic.
+
+### Exercise 6
+
+Suppose we collect data for a group of students in a statistics class with variables $X1 =$ hours studied, $X2 =$ undergrad GPA, and $Y =$ receive an A. We fit a logistic regression and produce estimated coefficient, $\hat{\beta_0} = -6, \hat{\beta_1}  = 0.05, \hat{\beta_2} = 1.$
 
 (a) Estimate the probability that a student who studies for 40 h and has an undergrad GPA of 3.5 gets an A in the class.
 
-(b) How many hours would the student in part (a) need to study to have a 50 % chance of getting an A in the class?
+\begin{itemize}
+\item Given the student studies 40 hours having $gpa = 3.5$, the probability of getting an A in the class is given by :
+$$
+\frac{\exp(-6 + 0.05(40) +3.5)}{1 + \exp(-6 + 0.05(40) +3.5)} \approx 0.377
+$$
+Thus the probability that a student who studies for 40 hours and has an undergrad GPA of 3.5 gets an A in the class is approximately 0.377 or 37.7\%.
+\end{itemize}
+
+(b) How many hours would the student in part (a) need to study to have a 50 \% chance of getting an A in the class?
+
+
+\begin{itemize}
+\item To have a 50\% chance of getting an A in the class, we need to set the probability equal to 0.5 and solve for hours studied. This gives us:
+\begin{align*}
+\frac{\exp(-6 + 0.05X +3.5)}{1 + \exp(-6 + 0.05X +3.5)} &= \frac{1}{2} \\
+\exp(0.05X -2.5) &= \frac{(1 + \exp(0.05X -2.5))}{2} \\
+\log(\exp(0.05X -2.5)) &= \log\left(\frac{(1 + \exp(0.05X -2.5))}{2}\right) \\
+0.05X -2.5 &= \log(1 + \exp(0.05X -2.5)) - \log(2) \\
+0.05X -2.5 + \log(2) &= \log(1 + \exp(0.05X -2.5)) \\
+0.05X -2.5 + \log(2) &= \log(1 + \exp(0.05X -2.5)) \\
+2 \exp(0.05X -2.5) &= 1 + \exp(0.05X -2.5) \\
+\exp(0.05X -2.5) &= 1 \\
+\log(\exp(0.05X -2.5)) &= \log(1) \\
+0.05X -2.5 &= 0 \\
+0.05X &= 2.5 \\
+X &= \frac{2.5}{0.05} \\
+X &= 50
+\end{align*}
+
+Thus we project that the student would need to study for some 50 hours to have a 50\% chance of getting an A.
+\end{itemize}
 
 * * *
 
@@ -47,23 +97,182 @@ This question should be answered using the Weekly data set, which is part of the
 
 (a) Produce some numerical and graphical summaries of the Weekly data. Do there appear to be any patterns?
 
+```{r}
+#load in 
+data("Weekly")
+
+# summary
+summary(Weekly)
+
+# view  of first few rows
+head(Weekly)
+
+# pairwise scatterplots of the numeric columns i.e excluding DIrection
+pairs(Weekly[ , -9])
+
+# corr. matrix
+cor_matrix <- cor(Weekly[ , -9], use = "complete.obs")
+cor_matrix
+
+# heatmap view of the correlation matrix
+heatmap(cor_matrix, Rowv = NA, Colv = NA, scale = "none")
+
+```
+
+- It would seem that from the summary output the variabes Lag1 - Lag5 the variables Lag1 through Lag5, Today, and Volume all seem to have a wide range of values ( ranging from around -18% to about +12%). The “Direction” factor splits observations into “Up” vs “Down”. Looking at the output from the pairs function and the correlation matrix, we can see that there is little evidence of a correlation among the LagX variables and Today. Moreover none of the lagged returns exhibit a strong pairwise correlation with one another nor with today. The only strong correlation shown is between Year and Volume $(\approx 0.84)$. This indicates that trading Volume tends to increase significantly over time
+
 (b) Use the full data set to perform a logistic regression with Direction as the response and the five lag variables plus Volume as predictors. Use the summary function to print the results. Do any of the predictors appear to be statistically significant? If so, which ones?
+
+```{r}
+# logistic regression
+logistic_model <- glm(Direction ~ Lag1 + Lag2 + Lag3 + Lag4 + Lag5 + Volume,
+                      data = Weekly,
+                      family = binomial)
+summary(logistic_model)
+
+```
+- The summary output indicates that the only statistically significant predictor is Lag2, with a p-value of 0.0296. This suggests that Lag2 has a significant effect on the probability of the stock price going up or down. The other predictors (Lag1, Lag3, Lag4, Lag5, and Volume) do not appear to be statistically significant at the 0.05 level. 
 
 (c) Compute the confusion matrix and overall fraction of correct predictions. Explain what the confusion matrix is telling you about the types of mistakes made by logistic regression.
 
+```{r}
+# Confusion matrix
+predictions <- ifelse(predict(logistic_model, type = "response") > 0.5,
+                      "Up", "Down")
+conf_matrix <- table(predictions, Weekly$Direction)
+conf_matrix
+accuracy <- sum(diag(conf_matrix)) / sum(conf_matrix)
+accuracy
+
+```
+
+- The confusion matrix shows the number of correct and incorrect predictions made by the logistic regression model. Diagonal entries (54 and 557) represent the number of correct predictions, while the off-diagonal elements (48 and 430) represent the number of incorrect predictions. overall accuracy the model is approximately 56.1\% right so it would seem to be slightly better than random guessing, but there is still a significant amount of error in its predictions.
+
 (d) Now fit the logistic regression model using a training data period from 1990 to 2008, with Lag2 as the only predictor. Compute the confusion matrix and the overall fraction of correct predictions for the held out data (that is, the data from 2009 and 2010).
+
+```{r}
+# Split the data into training and test sets
+train <- Weekly[Weekly$Year < 2009, ]
+test <- Weekly[Weekly$Year >= 2009, ]
+# fit the log reg model using lag2
+logistic_model_train <- glm(Direction ~ Lag2, data = train, family = binomial)
+
+
+pred_tst <- ifelse(predict(logistic_model_train, newdata = test,
+                                   type = "response") > 0.5, "Up", "Down")
+# confusion matrix
+conf_matrix_test <- table(pred_tst, test$Direction)
+conf_matrix_test
+acc_tst <- sum(diag(conf_matrix_test)) / sum(conf_matrix_test)
+acc_tst
+```
+
+- The confusion matrix for the held-out suggests that the model made 9 true negatives (i.e correctly predicted Dwn), 5 false negatives (i.e predicted Down but it was Up), 34 false positives , and 56 true positives . The overall accuracy of the model on the held-out data is approximately 62.5\%, which is an improvement over the training set accuracy.
 
 (e) Repeat (d) using LDA.
 
+```{r}
+lda_model_train <- lda(Direction ~ Lag2, data = train)
+# predictions on the test set
+pred_lda_test <- predict(lda_model_train, newdata = test)$class
+# confusion matrix
+conf_matrix_lda_test <- table(pred_lda_test, test$Direction)
+conf_matrix_lda_test
+acc_lda_tst <- 
+    sum(diag(conf_matrix_lda_test)) / sum(conf_matrix_lda_test)
+acc_lda_tst
+```
+
+- The confusion matrix for the LDA model shows us that the model made 8 true negatives , 6 false negatives , 30 false positives , and 56 true positives . The overall accuracy of the LDA model is comparable to what we got before and is approximately 62.5\%, which is similar to the logistic regression model.
+
 (f) Repeat (d) using QDA.
+
+```{r}
+qda_model_train <- qda(Direction ~ Lag2, data = train)
+# predictions on the test set
+pred_qda_tst <- predict(qda_model_train, newdata = test)$class
+# confusion matrix
+conf_matrix_qda_tst <- table(pred_qda_tst, test$Direction)
+conf_matrix_qda_tst
+accuracy_qda_test <- 
+    sum(diag(conf_matrix_qda_tst)) / sum(conf_matrix_qda_tst)
+accuracy_qda_test
+
+
+```
+
+- The confusion matrix for the QDA model shows us that the model made 0 true negatives, 0 false negatives , 43 false positives , and 61 true positives . The overall accuracy of the QDA model is approximately 58.6\%, which is lower than what we got before.
 
 (g) Repeat (d) using KNN with K = 1.
 
+```{r}
+train.X <- as.matrix(train$Lag2)
+test.X <- as.matrix(test$Lag2)
+train.Direction <- train$Direction
+set.seed(1) 
+knn_pred <- knn(train.X, test.X, train.Direction, k = 1)
+conf_matrix_knn <- table(knn_pred, test$Direction)
+conf_matrix_knn
+accuracy_knn <- sum(diag(conf_matrix_knn)) / sum(conf_matrix_knn)
+accuracy_knn
+
+```
+
+- The confusion matrix for the KNN model shows us that the model made 21 true negatives , 30 false negatives , 22 false positives , and 31 true positives . The overall accuracy of the KNN model is approximately 50\%, which is even lower than what we got before.
+
+
 (h) Repeat (d) using naive Bayes.
+```{r}
+naive_bayes_model_train <- naiveBayes(Direction ~ Lag2, data = train)
+# predictions on the test set
+pred_naive_bayes_tst <- predict(naive_bayes_model_train, newdata = test)
+# confusion matrix
+conf_matrix_naive_bay_tst <- table(pred_naive_bayes_tst, test$Direction)
+conf_matrix_naive_bay_tst
+accuracy_naive_bayes_test <- 
+    sum(diag(conf_matrix_naive_bay_tst)) / sum(conf_matrix_naive_bay_tst)
+accuracy_naive_bayes_test
+```
+
+- The confusion matrix for the Naive Bayes model shows us that the model made 0 true negatives , 0 false negatives , 43 false positives , and 61 true positives . The overall accuracy of the Naive Bayes model is approximately 58.6\%, which is similar to what we got before but still not as good as the logistic regression and LDA models.
 
 (i) Which of these methods appears to provide the best results on this data?
 
+- The logistic regression model with Lag2 as the only predictor seems to provide the best results on this data, with an overall accuracy of approximately 62.5\% on the held-out data. The LDA model also performed similarly well, while the QDA and KNN models performed worse. The Naive Bayes model also performed similarly to QDA and KNN.
+
 (j) Experiment with different combinations of predictors, including possible transformations and interactions, for each of the methods. Report the variables, method, and associated confusion matrix that appears to provide the best results on the held out data. Note that you should also experiment with values for K in the KNN classifier.
+
+```{r}
+# logistic regression with Lag2 and Lag3
+logistic_model_train_2 <- glm(Direction ~ Lag2 + Lag3,
+                              data = train,
+                              family = binomial)
+pred_tst_2 <- ifelse(predict(logistic_model_train_2,
+                                     newdata = test, type = "response") > 0.5,
+                             "Up", "Down")
+# confusion matrix
+conf_matrix_test_2 <- table(pred_tst_2, test$Direction)
+conf_matrix_test_2
+acc_tst_2 <-
+    sum(diag(conf_matrix_test_2))/sum(conf_matrix_test_2)
+acc_tst_2
+
+
+# log regression with Lag2 + Volume
+logistic_model_v2 <- glm(Direction ~ Lag2 + Volume,
+                         data = train,
+                         family = binomial)
+predictions_v2 <- ifelse(predict(logistic_model_v2,
+                                 test, type = "response") > 0.5,
+                         "Up",
+                         "Down")
+conf_matrix_v2 <- table(predictions_v2, test$Direction)
+accuracy_v2 <- sum(diag(conf_matrix_v2)) / sum(conf_matrix_v2)
+accuracy_v2
+
+```
+
+- The logistic regression model with Lag2 and Lag3 as predictors provided the best results on the held-out data, with an overall accuracy of approximately 62.5\%. The model with Lag2 and Volume as predictors performed slightly worse, with an accuracy of approximately 53.8\%. The KNN model with K = 1 performed the worst, with an accuracy of approximately 50\%. The LDA and QDA models also performed similarly to the logistic regression model, but not as well as the logistic regression model with Lag2 and Lag3.
 
 ### Exercise 15.
 This problem involves writing functions.
@@ -71,7 +280,13 @@ This problem involves writing functions.
 (a) Write a function, Power(), that prints out the result of raising 2 to the 3rd power. In other words, your function should compute $2^3$ and print out the results.
 
 Hint: Recall that x^a raises x to the power a. Use the print() function to output the result.
+```{r}
+Power <- function() {#compute 2^3 & print result
+  result <- 2^3
+  print(result)
+}
 
+```
 
 (b) Create a new function, Power2(), that allows you to pass any two numbers, x and a, and prints out the value of $x^a$. You can do this by beginning your function with the line
 
@@ -83,7 +298,21 @@ You should be able to call your function by entering, for instance,
 
 on the command line. This should output the value of 38 , namely, 6, 561.
 
+```{r}
+Power2 <- function(x, a) {# introduce params to computer x^a
+  result <- x^a
+  print(result)
+}
+```
+
 (c) Using the Power2() function that you just wrote, compute $10^3$ , $8^17$ , and $131^3$ .
+
+```{r}
+Power2(10, 3)
+Power2(8, 17)
+Power2(131, 3)
+```
+
 
 (d) Now create a new function, Power3(), that actually returns the result x^a as an R object, rather than simply printing it to the screen. That is, if you store the value x^a in an object called within your function, then you can simply return() this result, using the following line:
 
@@ -94,10 +323,43 @@ The line above should be the last line in your function, before
 the } symbol.
 
 
+```{r}
+Power3 <- function(x, a) {# augment to return resut instead of printing
+  result <- x^a
+  return(result)
+}
+```
+
+
 (e) Now using the Power3() function, create a plot of $f(x) = x^2$ . The x-axis should display a range of integers from 1 to 10, and the y-axis should display $x^2$ . Label the axes appropriately, and use an appropriate title for the figure. Consider displaying either the x-axis, the y-axis, or both on the log-scale. You can do this by using log = "x", log = "y", or log = "xy" as arguments to the plot() function.
+
+```{r}
+# vector to store 1 : 10
+x <- 1:10
+# apply the function to each element in x
+y <- Power3(x, 2) 
+
+#plot
+plot(x, y, type = "b", col = "blue", pch = 19, 
+     xlab = "x", 
+     ylab = "f(x) = x^2", 
+     main = "Plot of f(x) = x^2", 
+     log = "y")
+```
+
 
 (f) Create a function, PlotPower(), that allows you to create a plot of x against x^a for a fixed a and for a range of values of x. For instance, if you call
 > PlotPower (1:10 , 3)
 
 then a plot should be created with an x-axis taking on values
 $1, 2, \dots , 10$, and a y-axis taking on values $1^3 , 2^3 , \dots , 10^3$ .
+
+```{r}
+PlotPower <- function(x, a) {
+  y <- Power3(x, a)
+  plot(x, y, type = "b", col = "blue", pch = 19,
+       xlab = "x",
+       ylab = paste("f(x) = x^", a),
+       main = paste("Plot of f(x) = x^", a))
+}
+```
