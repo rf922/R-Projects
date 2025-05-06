@@ -1,0 +1,318 @@
+---
+title: "Chapter 5 HW"
+author: "Fabiani Rafael"
+#date: "Due date of Chapter 2 HW"
+output:
+  pdf_document: default
+  html_document:
+    fig_height: 4
+    highlight: pygments
+    theme: spacelab
+  word_document: default
+header-includes:
+- \usepackage{enumitem}
+---
+
+
+```{r setup, include=FALSE}
+# DO NOT ALTER CODE IN THIS CHUNK
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(ggplot2)
+library(ISLR2)
+library(boot)
+library(MASS)
+
+```
+
+* * *
+
+## Conceptual Questions
+
+
+#### Exercise 3:
+We now review k-fold cross-validation. 
+
+(a) Explain how k-fold cross-validation is implemented.
+- Given a data set of say n observations the set would then be randomly partitioned into k equal-sized folds. For each fold therein, the model is trained on the remaining k-1 folds and subsequently validated on the current fold. The process is repeated k times, with each fold being used as the validation set once.   The validation error, such as the mean squared error MSE, is then computed using the held-out set. The average of these error values yields the overall cross-validation error. 
+
+
+(b) What are the advantages and disadvantages of k-fold crossvalidation relative to:
+
+\begin{enumerate}
+
+\item the validation set approach?
+
+\begin{itemize}
+    \item Advantages:\\
+  - More data is used for training, as each observation is used in the training set k-1 times.
+  
+  - can provide a more reliable estimate of the model's performance by averaging over multiple folds.
+  
+\item Disadvantages:\\
+  - More computationally expensive, as the model needs to be trained k times. That is to say as the data set increases the computational costs increase.
+  
+  - The choice of k can affect the results; too small or too large k can lead to biased estimates.
+  
+\end{itemize}
+
+\item LOOCV (leave-one-out cross-validation)?
+
+\begin{itemize}
+    \item Advantages:\\
+  - Each training set is almost the same size as the original data which can yield less biased estimates of the model's performance.
+
+  - Useful for smaller data sets where every observation is valuable.
+
+\item Disadvantages:\\
+  - computationally expensive, as the model needs to be trained n times.
+
+  - High variance in the estimates, especially for small data sets, as each training set is very similar.
+  
+\end{itemize}
+
+
+\end{enumerate}
+* * *
+
+## Applied Questions
+
+
+#### Exercise 5:
+In Chapter 4, we used logistic regression to predict the probability of default using income and balance on the Default data set. We will now estimate the test error of this logistic regression model using the validation set approach. Do not forget to set a random seed before beginning your analysis.
+
+(a) Fit a logistic regression model that uses income and balance to predict default.
+
+```{r}
+
+# fit logistic regression model & summary
+log_mdl <- glm(default ~ income + balance, data = Default, family = binomial)
+summary(log_mdl)
+```
+
+(b) Using the validation set approach, estimate the test error of this model. In order to do this, you must perform the following steps:
+
+\begin{enumerate}[label=(\roman*)]
+\item Split the sample set into a training set and a validation set.
+
+\item Fit a multiple logistic regression model using only the training observations.
+
+\item Obtain a prediction of default status for each individual in the validation set by computing the posterior probability of default for that individual, and classifying the individual to the default category if the posterior probability is greater than $0.5$.
+
+\item Compute the validation set error, which is the fraction of the observations in the validation set that are misclassified.
+
+\end{enumerate}
+
+```{r}
+
+set.seed(216)
+
+# split 70 - 30 
+train_index <- sample(1:nrow(Default), nrow(Default) * 0.7)
+
+# create the training and validation sets
+train_set <- Default[train_index, ]
+validtn_set <- Default[-train_index, ]
+
+# fit the logistic regression model & summary
+log_mdl <- glm(default ~ income + balance, data = train_set, family = binomial)
+
+# obtain the predicted probabilities
+predictd_probs <- predict(log_mdl, newdata = validtn_set, type = "response")
+# classify the individuals based on the predicted probabilities
+predictd_classes <- ifelse(predictd_probs > 0.5, "Yes", "No")
+
+# compute the validatn set error
+validtn_error <- mean(predictd_classes != validtn_set$default)
+validtn_error
+
+```
+
+(c) Repeat the process in (b) three times, using three different splits of the observations into a training set and a validation set. Comment on the results obtained.
+
+```{r}
+set.seed(216)
+# init vector to store validation errors
+validtn_errs <- numeric(3)
+
+for (i in 1:3) {
+  # split 70-30  
+  train_indx <- sample(1:nrow(Default), nrow(Default) * 0.7) 
+  train_set <- Default[train_indx, ] 
+  validtn_set <- Default[-train_indx, ]  
+  
+  # fit logistic reg model
+  log_mdl <- glm(default ~ income + balance, data = train_set, family = binomial)
+  
+  # get pred prob & classes
+  pred_prob <- predict(log_mdl, newdata = validtn_set, type = "response")
+  pred_clss <- ifelse(pred_prob > 0.5, "Yes", "No") 
+  
+  # compute validtn set error
+  validtn_errs[i] <- mean(pred_clss != validtn_set$default)  
+}
+
+# show valid errors
+validtn_errs
+
+```
+
+(d) Now consider a logistic regression model that predicts the probability of default using income, balance, and a dummy variable for student. Estimate the test error for this model using the validation set approach. Comment on whether or not including a dummy variable for student leads to a reduction in the test error rate.
+
+```{r}
+# fit the logistic regression model & summary
+log_mdl_student <- glm(default ~ income + balance + student, data = train_set, family = binomial)
+
+# get predicted probabilities
+predictd_probs_student <- predict(log_mdl_student, newdata = validtn_set, type = "response")
+
+# classify the individuals on the predicted probabilities
+predictd_classes_student <- ifelse(predictd_probs_student > 0.5, "Yes", "No")
+
+
+# get validation set error
+validtn_error_student <- mean(predictd_classes_student != validtn_set$default)
+validtn_error_student
+```
+\begin{itemize}
+  \item The test error for the model with the dummy variable for student (2.5%) is nearly identical to the model without it, suggesting that including `student` does not significantly reduce the test error rate.
+\end{itemize}
+
+
+#### Exercise 6:
+We continue to consider the use of a logistic regression model to predict the probability of default using income and balance on the Default data set. In particular, we will now compute estimates for the standard errors of the income and balance logistic regression coefficients in two different ways: (1) using the bootstrap, and (2) using the standard formula for computing the standard errors in the glm() function. Do not forget to set a random seed before beginning your analysis.
+
+(a) Using the summary() and glm() functions, determine the estimated standard errors for the coefficients associated with income and balance in a multiple logistic regression model that uses both predictors.
+
+```{r}
+# fit the logistic regression model & summary
+log_mdl <- glm(default ~ income + balance, data = Default, family = binomial)
+summary(log_mdl)
+# extract the standard errors
+std_errors <- summary(log_mdl)$coefficients[, "Std. Error"]
+std_errors
+```
+
+
+(b) Write a function, boot.fn(), that takes as input the Default data set as well as an index of the observations, and that outputs the coefficient estimates for income and balance in the multiple logistic regression model.
+
+```{r}
+boot.fn <- function(data, index) {# return income & balance
+  log_mdl <- glm(default ~ income + balance, data = data[index, ], family = binomial)
+  return(coef(log_mdl)[c("income", "balance")])  
+}
+
+```
+
+
+(c) Use the boot() function together with your boot.fn() function to estimate the standard errors of the logistic regression coefficients for income and balance.
+
+```{r}
+set.seed(216)
+# bootstrap with 1k reps income & balance
+boot_results <- boot(
+  data = Default, 
+  statistic = boot.fn, 
+  R = 1000
+)
+
+# std err for income & balance
+boot_se_income <- sd(boot_results$t[, 1])  
+boot_se_balance <- sd(boot_results$t[, 2]) 
+
+cat("Bootstrap Standard Errors:\n",
+    "Income:", boot_se_income, "\n",
+    "Balance:", boot_se_balance)
+
+```
+
+ 
+(d) Comment on the estimated standard errors obtained using the glm() function and using your bootstrap function.
+
+- The standard errors obtained from the glm() function are 0.000005 and 0.000234 for income and balance, respectively. The bootstrap standard errors are 4.772267e-06 and 0.0002335733, which are very similar to the glm() estimates. This suggests that the bootstrap method provides a reliable estimate of the standard errors for the coefficients in this logistic regression model.
+
+
+#### Exercise 7:
+In Sections 5.3.2 and 5.3.3, we saw that the cv.glm() function can be used in order to compute the LOOCV test error estimate. Alternatively, one could compute those quantities using just the glm() and predict.glm() functions, and a for loop. You will now take this approach in order to compute the LOOCV error for a simple logistic regression model on the Weekly data set. Recall that in the context of classification problems, the LOOCV error is given in (5.4).
+
+(a) Fit a logistic regression model that predicts Direction using Lag1 and Lag2.
+
+```{r}
+# fit the logistic regression model & summary
+log_mdl_weekly <- glm(Direction ~ Lag1 + Lag2, data = Weekly, family = binomial)
+summary(log_mdl_weekly)
+```
+
+(b) Fit a logistic regression model that predicts Direction using Lag1 and Lag2 using all but the first observation.
+
+```{r}
+# fit the logistic regression model & summary
+log_mdl_weekly_1 <- glm(Direction ~ Lag1 + Lag2, data = Weekly[-1, ], family = binomial)
+summary(log_mdl_weekly_1)
+```
+
+
+(c) Use the model from (b) to predict the direction of the first observation. You can do this by predicting that the first observation will go up if $P (Direction = \text{"Up"} \,| \, Lag1, Lag2) > 0.5$. Was this observation correctly classified?
+
+```{r}
+# get the predicted probabilities
+predictd_probs_weekly_1 <- predict(log_mdl_weekly_1, newdata = Weekly[1, ], type = "response")
+# classify the individual based on the predicted probabilities
+predictd_class_weekly_1 <- ifelse(predictd_probs_weekly_1 > 0.5, "Up", "Down")
+
+# check if the prediction is correct
+correct_class_weekly_1 <- ifelse(predictd_class_weekly_1 == Weekly$Direction[1], 1, 0)
+cat("Predicted class for the first observation:", predictd_class_weekly_1, "\n")
+cat("Correct class for the first observation:", Weekly$Direction[1], "\n")
+cat("Was the prediction correct?", ifelse(correct_class_weekly_1 == 1, "Yes", "No"), "\n")
+```
+- The first observation was predicted to be "Up" with a probability of 0.5, but the actual direction was "Down" hemce the prediction was incorrect.
+
+(d) Write a for loop from i = 1 to i = n, where n is the number of observations in the data set, that performs each of the following steps:
+
+\begin{enumerate}[label=(\roman*)]
+
+\item Fit a logistic regression model using all but the ith observation to predict Direction using Lag1 and Lag2.
+
+\item Compute the posterior probability of the market moving up for the ith observation.
+
+\item Use the posterior probability for the ith observation in order to predict whether or not the market moves up.
+
+\item Determine whether or not an error was made in predicting the direction for the ith observation. If an error was made, then indicate this as a 1, and otherwise indicate it as a 0.
+
+\end{enumerate}
+
+```{r}
+n <- nrow(Weekly)
+# init vector to store th errs
+errors <- numeric(n)
+
+for (i in 1:n) {# iterating through each obs
+  # fit log reg model leaving outt the ith obs
+  log_mdl_weekly_i <- glm(Direction ~ Lag1 + Lag2, data = Weekly[-i, ], family = binomial)
+  
+  # get the posterior probability of the market moving up for the ith observation
+  predictd_probs_weekly_i <- predict(log_mdl_weekly_i, newdata = Weekly[i, ], type = "response")
+  
+  # classfy on the pred prob
+  predictd_class_weekly_i <- ifelse(predictd_probs_weekly_i > 0.5, "Up", "Down")
+  
+  #  whether or not an error was made in predicting the direction for the ith observation
+  errors[i] <- ifelse(predictd_class_weekly_i != Weekly$Direction[i], 1, 0)
+}
+#  LOOCV error
+loocv_error <- mean(errors)
+cat("LOOCV Error Rate:", loocv_error, "\n")
+```
+
+
+(e) Take the average of the n numbers obtained in (d)iv in order to obtain the LOOCV estimate for the test error. Comment on the results.
+
+```{r}
+#   LOOCV err
+loocv_error <- mean(errors)
+cat("LOOCV Error Rate:", loocv_error, "\n")
+```
+
+
+- The LOOCV error rate is $0.449 \approx 0.45$  i.e the model misclassifies 45% of the observations in the data set. This is a relatively high error rate, indicating that the model may not be performing well in predicting the direction of the market based on Lag1 and Lag2. Moreover the error rate makes it clear that the model is not very effective in predicting the direction of the market, as it misclassifies nearly half of the observations. It is technically better than pure by chance but not by much.

@@ -1,0 +1,65 @@
+---
+title: "chapter 07 hw"
+author: "Fabiani Rafael"
+output:
+  pdf_document:
+    includes:
+      in_header: null
+    keep_tex: true
+  html_document:
+    fig_height: 4
+    highlight: pygments
+    theme: spacelab
+  word_document: default
+header-includes:
+  - \usepackage{fancyhdr}
+  - \pagestyle{fancy}
+  - \setlength{\headheight}{14.49998pt}
+  - \fancyhead[L]{MATH 448}
+  - \fancyhead[C]{Take-home Midterm Exam}
+  - \fancyhead[R]{Spring 2025}
+  - \renewcommand{\headrulewidth}{0.4pt}
+  - \renewcommand{\footrulewidth}{0.4pt}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+\thispagestyle{fancy}
+
+
+## Conceptual Questions
+
+
+#### Exercise 1: What is Statisistical Learning?
+
+Statistical Learning refers to a set of tools to understand data.
+
+
+
+#### Exercise 2: What is Data Mining?
+
+Data mining is the analysis step of "knowledge discovery in databases" process.
+
+* * *
+
+## Applied Questions
+
+#### Exercise 3: 
+(a) add code to the chuck. $Y=\beta_0+\beta_1x+\epsilon$
+
+$$p_k(x)=\frac{\pi_kf_k(x)}{\sum_{l=1}^K\pi_lf_l(x)}$$  
+
+
+```{r}
+summary(cars)
+plot(cars)
+```
+
+(b) make comments if needed.
+
+
+
+
+
+

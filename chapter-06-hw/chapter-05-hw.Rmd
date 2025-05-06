@@ -1,0 +1,102 @@
+---
+title: "Chapter 6 HW"
+author: "Fabiani Rafael"
+#date: "Due date of Chapter 2 HW"
+output:
+  pdf_document: default
+  html_document:
+    fig_height: 4
+    highlight: pygments
+    theme: spacelab
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+# DO NOT ALTER CODE IN THIS CHUNK
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(ISLR2)
+library(ggplot2)
+library(MASS)
+library(class)
+library(e1071)
+```
+
+* * *
+
+## Conceptual Questions
+1. We perform best subset, forward stepwise, and backward stepwise selection on a single data set. For each approach, we obtain $p + 1$ models, containing $0, 1, 2, \dots , p$predictors. Explain your answers:
+
+(a) Which of the three models with k predictors has the smallest \textit{training} RSS?
+
+- The model with k predictors that has the smallest training RSS is the one obtained by use of the best subset selection method. This is due to how best subset selection considers all possible combinations of predictors and selects the one that minimizes the training RSS.
+
+(b) Which of the three models with k predictors has the smallest test RSS?
+
+- The model with k predictors that has the smallest test RSS is not necessarily the one obtained by best subset selection. It could be any of the three methods, depending on how well they generalize to unseen data. The test RSS is influenced by the model's ability to generalize, which is not guaranteed to be the best subset selection method. Moreover the best subset selection method may overfit the training data and consequently yielding a higher test RSS. Now for forward and backward stepwise selection, theres no gurantee that the model with k predictors will be the one that minimizes the test RSS.
+
+(c) True or False:
+
+i. The predictors in the k-variable model identified by forward stepwise are a subset of the predictors in the $(k +1)$ variable model identified by forward stepwise selection.
+
+- True
+
+ii. The predictors in the k-variable model identified by backward stepwise are a subset of the predictors in the $(k + 1)$ variable model identified by backward stepwise selection.
+
+- True
+
+iii. The predictors in the k-variable model identified by backward stepwise are a subset of the predictors in the (k + 1) variable model identified by forward stepwise selection.
+
+- False
+
+iv. The predictors in the k-variable model identified by forward stepwise are a subset of the predictors in the $(k +1)$ variable model identified by backward stepwise selection.
+
+- False
+
+v. The predictors in the k-variable model identified by best subset are a subset of the predictors in the $(k + 1)$ variable model identified by best subset selection.
+
+- False
+
+For parts (a) through (c), indicate which of i. through iv. is correct. Justify your answer.
+
+(a) The lasso, relative to least squares, is:
+
+i. More flexible and hence will give improved prediction accuracy when its increase in bias is less than its decrease in variance.
+
+ii. More flexible and hence will give improved prediction accuracy when its increase in variance is less than its decrease in bias.
+
+iii. Less flexible and hence will give improved prediction accuracy when its increase in bias is less than its decrease in variance.
+
+iv. Less flexible and hence will give improved prediction accuracy when its increase in variance is less than its decrease in bias.
+
+- Of these iii is correct. The optimal selection for $\lambda$ will result in a decrease in the variance of the model, which will lead to an increase in bias. This is because the lasso shrinks the coefficients towards zero, which reduces the model's flexibility and variance.
+
+(b) Repeat (a) for ridge regression relative to least squares.
+- Of these iii is correct. The optimal selection for $\lambda$ will result in a decrease in the variance of the model, which will lead to an increase in bias. This is because ridge regression shrinks the coefficients towards zero, which reduces the model's flexibility and variance.
+
+(c) Repeat (a) for non-linear methods relative to least squares.
+
+- Of these i is correct. A non linear method is more flexible than least squares, and it can improve prediction accuracy when the increase in bias is less than the decrease in variance. Non-linear methods can capture complex relationships in the data, which can lead to better predictions.
+
+* * *
+
+## Applied Questions
+
+9. In this exercise, we will predict the number of applications received using the other variables in the College data set.
+
+(a) Split the data set into a training set and a test set.
+
+(b) Fit a linear model using least squares on the training set, and
+report the test error obtained.
+
+(c) Fit a ridge regression model on the training set, with $\lambda$ chosen by cross-validation. Report the test error obtained.
+
+(d) Fit a lasso model on the training set, with $\lambda$ chosen by cross validation. Report the test error obtained, along with the number of non-zero coefficient estimates.
+
+(e) Fit a PCR model on the training set, with M chosen by cross validation. Report the test error obtained, along with the value of M selected by cross-validation.
+
+(f) Fit a PLS model on the training set, with M chosen by cross validation. Report the test error obtained, along with the value of M selected by cross-validation.
+
+(g) Comment on the results obtained. How accurately can we predict the number of college applications received? Is there much difference among the test errors resulting from these five approaches?
+
+
