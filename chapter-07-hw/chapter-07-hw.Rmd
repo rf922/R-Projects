@@ -16,7 +16,7 @@ header-includes:
   - \pagestyle{fancy}
   - \setlength{\headheight}{14.49998pt}
   - \fancyhead[L]{MATH 448}
-  - \fancyhead[C]{Take-home Midterm Exam}
+  - \fancyhead[C]{Chapter 7 HW}
   - \fancyhead[R]{Spring 2025}
   - \renewcommand{\headrulewidth}{0.4pt}
   - \renewcommand{\footrulewidth}{0.4pt}
@@ -24,6 +24,13 @@ header-includes:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(splines)
+library(MASS)
+library(boot)
+library(dplyr)
+library(caret)
+library(ISLR2)
 ```
 \thispagestyle{fancy}
 
@@ -31,35 +38,310 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Conceptual Questions
 
 
-#### Exercise 1: What is Statisistical Learning?
+#### Exercise 3:
+Suppose we fit a curve with basis functions $b_1(X) = X , \, b_2(X) = (X -1)^2I(X \geq 1)$. (Note that $I(X \geq 1)$ equals 1 for $X \geq 1$ and 0 otherwise) We fit the linear regression model 
+$$ Y = \beta_0 + \beta_1b_1(X) + \beta_2b_2(X) + \epsilon ,$$ and obtain coefficient estimates $\hat\beta_0 = 1, \hat\beta_1 =1, \hat\beta_2 = -2.$ Sketch the estimated curve between $X = -2$ and $X = 2.$ Note the intercepts, slopes and other relevant information.
 
-Statistical Learning refers to a set of tools to understand data.
+Using R to create the sketch we see that the slope is 1 for $X < 1$ and when $X \geq 1$ the eqaution $ Y =  1 + X - 2(X - 1)^2 = 1 + X -2(X^2 -2X + 1) = -2X^2 + 5X - 1$ has a slope $-4X + 5$. The intercept is at $(0, 1)$ and the function is continuous at $X = 1$.
+```{r}
+
+X <- seq(-2, 2, length.out = 100)
+b1 <- X
+b2 <- (X - 1)^2 * (X >= 1)
+Y <- 1 + b1 + (-2) * b2
+plot(X, Y, type = "l", col = "blue", lwd = 2, xlab = "X", ylab = "Y",
+     main = "Estimated Curve with Basis Functions")
+abline(h = 0, col = "black", lty = 2)
+abline(v = 0, col = "black", lty = 2)
+points(-1, 0, col = "green", pch = 19)
+text(-.5, -.5, "Intercept at (-1, 0)", col = "green")
+
+
+```
 
 
 
-#### Exercise 2: What is Data Mining?
-
-Data mining is the analysis step of "knowledge discovery in databases" process.
 
 * * *
 
 ## Applied Questions
 
-#### Exercise 3: 
-(a) add code to the chuck. $Y=\beta_0+\beta_1x+\epsilon$
+#### Exercise 6:
+In this exercise, you will further analyze the $\mathbf{Wage}$ data set considered throughout this chapter.
 
-$$p_k(x)=\frac{\pi_kf_k(x)}{\sum_{l=1}^K\pi_lf_l(x)}$$  
-
+(a) Perform polynomial regression to predict wage using age. Use crossvalidation to select the optimal degree d for the polynomial. What degree was chosen, and how does this compare to the results of hypothesis testing using ANOVA? Make a plot of the resulting polynomial fit to the data.
 
 ```{r}
-summary(cars)
-plot(cars)
+
+data(Wage)
+set.seed(488)
+
+# cv for polynomial degrees 1–5
+degrees <- 1:5
+cv_errors <- numeric(length(degrees))
+
+for (d in degrees) {
+  #  model formula with degree d
+  model_formula <- as.formula(paste("wage ~ poly(age,", d, ")"))
+  
+  #  10-fold cross-validation
+  glm_model <- glm(model_formula, data = Wage)
+  cv_results <- cv.glm(Wage, glm_model, K = 10)
+  
+  # Store cross-validation error (MSE)
+  cv_errors[d] <- cv_results$delta[1]
+}
+
+# Identify optimal degree with minimal CV error
+optimal_degree <- degrees[which.min(cv_errors)]
+cat("Optimal polynomial degree from CV:", optimal_degree, "\n")
+
+# fit models for deg 1, ... ,4
+fit_1 <- lm(wage ~ poly(age, 1), data = Wage)  
+fit_2 <- lm(wage ~ poly(age, 2), data = Wage)  
+fit_3 <- lm(wage ~ poly(age, 3), data = Wage)  
+fit_4 <- lm(wage ~ poly(age, 4), data = Wage)  
+
+# comp models using ANOVA
+anova_results <- anova(fit_1, fit_2, fit_3, fit_4)
+print(anova_results)
 ```
 
-(b) make comments if needed.
+From the output it would seem that cv of the polynomial regression tells us that a 4th degree polynomial is the optimal choice. ANOVA analysis however suggest that a 3rd degree  is the best as it is the highest degree that retains a p-value below 0.05.
 
 
+(b) Fit a step function to predict wage using age, and perform crossvalidation to choose the optimal number of cuts. Make a plot of the fit obtained.
+
+```{r}
+
+set.seed(488)
+K_values <- 2:10
+cv_errors_step <- numeric(length(K_values))
+
+# age range from full dataset
+age_full <- Wage$age
+min_age <- min(age_full)
+max_age <- max(age_full)
+
+for (k in K_values) {
+  # breaks based on dataset age range 
+  breaks <- seq(min_age, max_age, length.out = k + 1)
+  
+  # factor variable using breaks
+  Wage$age_cut <- cut(age_full, breaks = breaks, include.lowest = TRUE)
+  
+  # 10-X CV
+  cv_results <- cv.glm(
+    data = Wage,
+    glmfit = glm(wage ~ age_cut, data = Wage),
+    K = 10
+  )
+  cv_errors_step[k - 1] <- cv_results$delta[1]
+}
+
+# get optimal K
+opt_k <- K_values[which.min(cv_errors_step)]
+cat("Optimal number of intervals from CV:", opt_k, "\n")
+
+# fit model using opt k on full data
+optimal_breaks <- seq(min_age, max_age, length.out = opt_k + 1)
+Wage$age_cut <- cut(age_full, breaks = optimal_breaks, include.lowest = TRUE)
+optimal_step_model <- glm(wage ~ age_cut, data = Wage)
+
+# get predictions for plot
+pred_data <- data.frame(age = seq(min_age, max_age, length.out = 1000))
+pred_data$age_cut <- cut(pred_data$age, breaks = optimal_breaks, include.lowest = TRUE)
+pred_data$wage_pred <- predict(optimal_step_model, newdata = pred_data)
+
+# plot step func fit
+ggplot(Wage, aes(x = age, y = wage)) +
+  geom_point(alpha = 0.2, color = "gray50") +
+  geom_step(
+    data = pred_data,
+    aes(x = age, y = wage_pred),
+    color = "red",
+    linewidth = 1
+  ) +
+  labs(
+    title = paste("Step Function Fit with", opt_k, "Intervals"),
+    x = "Age",
+    y = "Wage"
+  ) +
+  theme_minimal()
+```
 
 
+#### Exercise 9:
+This question uses the variables dis (the weighted mean of distances to five Boston employment centers) and nox (nitrogen oxides concentration in parts per 10 million) from the Boston data. We will treat dis as the predictor and nox as the response.
+
+(a) Use the poly() function to fit a cubic polynomial regression to predict nox using dis. Report the regression output, and plot the resulting data and polynomial fits.
+
+```{r}
+data(Boston)
+set.seed(488)
+# cubic poly regression
+cubic_model <- lm(nox ~ poly(dis, 3), data = Boston)
+summary(cubic_model)
+# predictions for plot
+pred_data <- data.frame(dis = seq(min(Boston$dis), max(Boston$dis), length.out = 100))
+pred_data$nox_pred <- predict(cubic_model, newdata = pred_data)
+# plot data , polynomial fit
+ggplot(Boston, aes(x = dis, y = nox)) +
+  geom_point(alpha = 0.2, color = "gray50") +
+  geom_line(data = pred_data, aes(x = dis, y = nox_pred), color = "blue", linewidth = 1) +
+  labs(title = "Cubic Polynomial Fit to Predict NOx using DIS",
+       x = "DIS (Distance to Employment Centers)",
+       y = "NOx (Nitrogen Oxides Concentration)") +
+  theme_minimal()
 
 
+```
+
+(b) Plot the polynomial fits for a range of different polynomial degrees (say, from 1 to 10), and report the associated residual sum of squares.
+
+```{r}
+# polynomial regression for degrees 1 to 10
+degrees_poly <- 1:10
+rss_poly <- numeric(length(degrees_poly))
+for (d in degrees_poly) {
+  # fit polynomial model
+  poly_model <- lm(nox ~ poly(dis, d), data = Boston)
+  
+  # rss
+  rss_poly[d] <- sum(residuals(poly_model)^2)
+}
+#  RSS for different polynomial degrees
+rss_data <- data.frame(Degree = degrees_poly, RSS = rss_poly)
+ggplot(rss_data, aes(x = Degree, y = RSS)) +
+  geom_line(color = "red", size = 1) +
+  geom_point(size = 3) +
+  labs(title = "Residual Sum of Squares for Polynomial Degrees",
+       x = "Polynomial Degree",
+       y = "Residual Sum of Squares (RSS)") +
+  theme_minimal()
+# RSS values
+print(rss_data)
+# RSS values for each degree
+for (i in 1:length(degrees_poly)) {
+  cat("Degree", degrees_poly[i], "RSS:", rss_poly[i], "\n")
+}
+```
+
+(c) Perform cross-validation or another approach to select the optimal degree for the polynomial, and explain your results.
+```{r}
+set.seed(488)
+degrees_poly <- 1:10
+cv_errors_poly <- numeric(length(degrees_poly))
+
+for (d in degrees_poly) {
+  model_formula <- as.formula(paste("nox ~ poly(dis,", d, ")"))
+  
+  # GLM and perform 10-X CV
+  glm_model <- glm(model_formula, data = Boston)
+  cv_results <- cv.glm(Boston, glm_model, K = 10)
+  
+  #  CV error 
+  cv_errors_poly[d] <- cv_results$delta[1]
+}
+
+# optimal degree
+opt_poly <- degrees_poly[which.min(cv_errors_poly)]
+cat("Optimal polynomial degree from CV:", opt_poly, "\n")
+
+# CV errors
+ggplot(data.frame(Degree = degrees_poly, CV_Error = cv_errors_poly), 
+       aes(x = Degree, y = CV_Error)) +
+  geom_line(color = "blue", linewidth = 1) +
+  geom_point(size = 3) +
+  labs(title = "Cross-Validation Error by Polynomial Degree",
+       x = "Degree",
+       y = "CV MSE") +
+  theme_minimal()
+```
+From the result of the cross-validation, degree 3 balances bias and variance, yielding the lowest mean CV error, so it is the best selection over higher‑degree polynomials which may have extra flexibility however this doesnt necessarily mean they will result in a better prediction.
+
+(d) Use the bs() function to fit a regression spline to predict nox using dis. Report the output for the fit using four degrees of freedom. How did you choose the knots? Plot the resulting fit.
+
+```{r}
+
+# spline with df=4 
+spline_4df <- lm(nox ~ bs(dis, df = 4), data = Boston)
+
+# knots & model summary
+knots_4df <- attr(bs(Boston$dis, df = 4), "knots")
+cat("Knot locations for df=4:", knots_4df, "\n")
+summary(spline_4df)
+
+# spline fit
+pred_data <- data.frame(dis = seq(min(Boston$dis), max(Boston$dis), length.out = 100))
+pred_data$nox_pred <- predict(spline_4df, newdata = pred_data)
+
+ggplot(Boston, aes(x = dis, y = nox)) +
+  geom_point(alpha = 0.2, color = "gray50") +
+  geom_line(data = pred_data, aes(x = dis, y = nox_pred), color = "green", linewidth = 1) +
+  labs(title = "Regression Spline Fit (df=4)",
+       x = "DIS",
+       y = "NOx") +
+  theme_minimal()
+```
+The placement of knots is determined by the data distribution and the number of degrees of freedom. In this case, we used 4 degrees of freedom, which allows for a flexible fit while avoiding overfitting. The knots are placed at quantiles of the predictor variable by default this may help the spline better convey the underlying structure in the data.
+
+(e) Now fit a regression spline for a range of degrees of freedom, and plot the resulting fits and report the resulting RSS. Describe the results obtained.
+```{r}
+df_values <- 3:10
+rss_spline <- numeric(length(df_values))
+
+for (i in seq_along(df_values)) {
+  spline_model <- lm(nox ~ bs(dis, df = df_values[i]), data = Boston)
+  rss_spline[i] <- sum(residuals(spline_model)^2)
+}
+
+# RSS vs df
+ggplot(data.frame(DF = df_values, RSS = rss_spline), aes(x = DF, y = RSS)) +
+  geom_line(color = "purple", linewidth = 1) +
+  geom_point(size = 3) +
+  labs(title = "RSS for Regression Splines",
+       x = "Degrees of Freedom",
+       y = "Residual Sum of Squares") +
+  theme_minimal()
+
+# RSS values
+cat("RSS for Splines:\n")
+print(data.frame(DF = df_values, RSS = rss_spline))
+```
+The RSS values indicate that as the degrees of freedom increase, the RSS tends to decrease, suggesting a better fit to the training data. However, this levels off, suggesting that additional knots beyond $\approx 6$ capture little extra signal and mostly fit noise. The optimal degree of freedom should balance bias and variance.
+
+(f) Perform cross-validation or another approach in order to select the best degrees of freedom for a regression spline on this data. Describe your results.
+
+```{r}
+set.seed(488)
+cv_errors_spline <- numeric(length(df_values))
+
+for (i in seq_along(df_values)) {
+  # model formula
+  model_formula <- as.formula(paste("nox ~ bs(dis, df =", df_values[i], ")"))
+  
+  # fit GLM , perform 10-X CV
+  glm_model <- glm(model_formula, data = Boston)
+  cv_results <- cv.glm(Boston, glm_model, K = 10)
+  
+  # CV error
+  cv_errors_spline[i] <- cv_results$delta[1]
+}
+
+# get optimal df
+opt_df_spline <- df_values[which.min(cv_errors_spline)]
+cat("Optimal spline df from CV:", opt_df_spline, "\n")
+
+#  CV errors
+ggplot(data.frame(DF = df_values, CV_Error = cv_errors_spline), 
+       aes(x = DF, y = CV_Error)) +
+  geom_line(color = "orange", linewidth = 1) +
+  geom_point(size = 3) +
+  labs(title = "Cross-Validation Error by Spline DF",
+       x = "Degrees of Freedom",
+       y = "CV MSE") +
+  theme_minimal()
+```
+
+10-X cross-validation was performed to select the optimal degrees of freedom for the regression spline. It reaches its lowest mean‑squared error at $df =8$, suggesting that an eight‑degree‑of‑freedom spline offers the best bias–variance trade‑off, with $df=7 \text{ or }9$ performing nearly as well.
