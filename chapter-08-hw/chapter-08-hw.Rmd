@@ -1,0 +1,440 @@
+---
+title: "chapter 08 hw"
+author: "Fabiani Rafael"
+output:
+  pdf_document:
+    includes:
+      in_header: null
+    keep_tex: true
+  html_document:
+    fig_height: 4
+    highlight: pygments
+    theme: spacelab
+  word_document: default
+header-includes:
+  - \usepackage{fancyhdr}
+  - \usepackage{tikz}
+  - \usetikzlibrary{graphs, trees, positioning}
+  - \pagestyle{fancy}
+  - \setlength{\headheight}{14.49998pt}
+  - \fancyhead[L]{MATH 448}
+  - \fancyhead[C]{Chapter 8 HW}
+  - \fancyhead[R]{Spring 2025}
+  - \renewcommand{\headrulewidth}{0.4pt}
+  - \renewcommand{\footrulewidth}{0.4pt}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(splines)
+library(MASS)
+library(boot)
+library(dplyr)
+library(caret)
+library(gbm)
+library(glmnet)
+library(broom)
+library(ISLR2)
+library(tree)
+library(randomForest)
+```
+\thispagestyle{fancy}
+
+
+## Conceptual Questions
+
+
+#### Exercise 4:
+This question relates to the plots in Figure 8.14.
+
+(a) Sketch the tree corresponding to the partition of the predictor space illustrated in the left-hand panel of Figure 8.14. The numbers inside the boxes indicate the mean of Y within each region.
+
+\begin{tikzpicture}[
+    level distance=2.5cm,
+    level 1/.style={sibling distance=6cm},
+    level 2/.style={sibling distance=3cm},
+    level 3/.style={sibling distance=1.5cm},
+    edge from parent/.style={draw, thick}
+]
+
+% Root node
+\node[draw, rounded corners] {\(X_1 < 1\)}
+    child {
+        % Left subtree
+        node[draw, rounded corners] {\(X_2 < 1\)}
+        child {
+            node[draw, rounded corners] {\(X_1 < \theta\)}
+            child {
+                node[draw, rectangle, fill=gray!20] {3}
+            }
+            child {
+                node[draw, rounded corners] {\(X_2 < \theta\)}
+                child {
+                    node[draw, rectangle, fill=gray!20] {10}
+                }
+                child {
+                    node[draw, rectangle, fill=gray!20] {0}
+                }
+            }
+        }
+        child {
+            node[draw, rectangle, fill=gray!20] {15}
+        }
+    }
+    child {
+        % Right subtree
+        node[draw, rectangle, fill=gray!20] {5}
+    };
+\end{tikzpicture}
+
+(b) Create a diagram similar to the left-hand panel of Figure 8.14, using the tree illustrated in the right-hand panel of the same figure. You should divide up the predictor space into the correct regions, and indicate the mean for each region.
+
+\begin{tikzpicture}[scale=1]
+
+% ------------------------------------------------------------------
+% 1.  OUTER FRAME ---------------------------------------------------
+% ------------------------------------------------------------------
+\draw[thick] (0,0) rectangle (10,6);     % overall bounding box
+
+% ------------------------------------------------------------------
+% 2.  HORIZONTAL PARTITIONS  ---------------------------------------
+% ------------------------------------------------------------------
+\draw[thick] (0,4) -- (10,4);            % upper horizontal cut   (y = 4)
+\draw[thick] (0,2) -- (10,2);            % lower horizontal cut   (y = 2)
+
+% ------------------------------------------------------------------
+% 3.  VERTICAL PARTITIONS  -----------------------------------------
+%    (note: each split lives only inside its own row)              
+% ------------------------------------------------------------------
+% split of the **middle** row (–1.06 | 0.21)
+\draw[thick] (3,2) -- (3,4);            
+
+% split of the **bottom** row  (–1.80 | 0.63)
+\draw[thick] (7,0) -- (7,2);             
+
+% ------------------------------------------------------------------
+% 4.  AXIS–STYLE TICK MARKS & NUMBERS  (optional) ------------------
+% ------------------------------------------------------------------
+% y–axis ticks (at y = 2 and y = 4)
+\draw[thick] (-0.25,2) -- (0,2);  \node[left] at (-0.25,2) {$1$};
+\draw[thick] (-0.25,4) -- (0,4);  \node[left] at (-0.25,4) {$2$};
+
+% x–axis ticks (at the two internal verticals; feel free to adjust)
+\draw[thick] (3,0) -- (3,-0.25); \node[below] at (3,-0.25) {$0$};
+\draw[thick] (10,0) -- (10,-0.25); \node[below] at (7,-0.25) {$1$};
+
+% ------------------------------------------------------------------
+% 5.  REGION LABELS  ------------------------------------------------
+% ------------------------------------------------------------------
+\node at (5,5)   {2.49};   % top row
+\node at (1.5,3) {-1.06};  % centre–left
+\node at (6.5,3) {0.21};   % centre–right
+\node at (4,1)   {-1.80};  % bottom–left
+\node at (8.5,1) {0.63};   % bottom–right
+
+\end{tikzpicture}
+
+
+* * *
+
+## Applied Questions
+
+#### Exercise 8 a-e:
+In the lab, a classification tree was applied to the Carseats data set after converting Sales into a qualitative response variable. Now we will seek to predict Sales using regression trees and related approaches, treating the response as a quantitative variable.
+
+(a) Split the data set into a training set and a test set.
+
+```{r}
+set.seed(448)
+data("Carseats")
+
+#  train/test split
+train_indices <- sample(1:nrow(Carseats), nrow(Carseats)/2)
+Carseats.train <- Carseats[train_indices, ]
+Carseats.test <- Carseats[-train_indices, ]
+```
+
+
+(b) Fit a regression tree to the training set. Plot the tree, and interpret the results. What test MSE do you obtain?
+
+```{r}
+full_tree <- tree(Sales ~ ., data = Carseats.train)
+
+# plot & label  tree
+plot(full_tree); text(full_tree, pretty = 0, cex = 0.7)
+
+full_pred <- predict(full_tree, Carseats.test)
+full_mse  <- mean((full_pred - Carseats.test$Sales)^2)
+cat("(b)  Unpruned tree  ·  test MSE =", round(full_mse, 3), "\n\n")
+```
+
+- The test MSE is  4.593 or about 4.6.
+
+(c) Use cross-validation in order to determine the optimal level of tree complexity. Does pruning the tree improve the test MSE?
+
+```{r}
+set.seed(448)
+cv_tree <- cv.tree(full_tree, FUN = prune.tree)
+
+
+# plot cv results
+plot(cv_tree$size, cv_tree$dev, type = "b", xlab = "Tree Size", ylab = "CV Deviation")
+
+# optimal tree size
+optimal_size <- cv_tree$size[which.min(cv_tree$dev)]
+cat("(c)  Optimal tree size =", optimal_size, "\n")
+# prune
+pruned_tree <- prune.tree(full_tree, best = optimal_size)
+
+# plot pruned tree
+plot(pruned_tree); text(pruned_tree, pretty = 0, cex = 0.7)
+
+# pred on the test set using the pruned tree
+pruned_pred <- predict(pruned_tree, Carseats.test)
+pruned_mse  <- mean((pruned_pred - Carseats.test$Sales)^2)
+cat("(c)  Pruned tree  ·  test MSE =", round(pruned_mse, 3), "\n\n")
+```
+
+- Pruning the tree seemed to increase MSE to 4.928 or about 4.9.
+
+(d) Use the bagging approach in order to analyze this data. What test MSE do you obtain? Use the importance() function to determine which variables are most important.
+```{r}
+
+# fit a bagging model
+bagging_model <- randomForest(Sales ~ ., data = Carseats.train, mtry = ncol(Carseats.train) - 1, ntree = 500)
+
+# predict on the test set
+bagging_pred <- predict(bagging_model, Carseats.test)
+
+# calculate test MSE
+bagging_mse <- mean((bagging_pred - Carseats.test$Sales)^2)
+cat("(d)  Bagging model  ·  test MSE =", round(bagging_mse, 3), "\n")
+# variable importance
+importance(bagging_model)
+# plot variable importance
+varImpPlot(bagging_model, main = "Variable Importance (Bagging)")
+```
+
+- The test MSE obtained is 2.634 or about 2.6.
+
+(e) Use random forests to analyze this data. What test MSE do you obtain? Use the importance() function to determine which variables are most important. Describe the effect of m, the number of variables considered at each split, on the error rate obtained.
+```{r}
+set.seed(448)
+predictors <- Carseats.train[, -which(names(Carseats.train) == "Sales")]
+response <- Carseats.train$Sales
+
+# optimal mtry with error handling
+best_mtry <- tuneRF(
+  x = predictors,
+  y = response,
+  ntreeTry = 500,
+  improve = 0.01,  
+  trace = FALSE    
+)
+
+# edge case no improvement
+if (length(best_mtry) == 0) {
+  best_mtry_value <- sqrt(ncol(predictors)) %>% round()
+} else {
+  best_mtry_value <- best_mtry[which.min(best_mtry[,2]), 1]
+}
+
+# fit fina model
+rf_fit <- randomForest(
+  Sales ~ .,
+  data = Carseats.train,
+  mtry = best_mtry_value,
+  importance = TRUE,
+  ntree = 500
+)
+
+pred_rf <- predict(rf_fit, Carseats.test)
+mse_rf <- round(mean((pred_rf - Carseats.test$Sales)^2), 3)
+
+# results
+varImpPlot(rf_fit, main = "Random Forest Variable Importance")
+cat("Optimal mtry:", best_mtry_value, "\nRF Test MSE:", mse_rf)
+```
+
+- It seems that this increased the MSE to over 2.6, at 2.611. 
+
+#### Exercise 10:
+We now use boosting to predict Salary in the Hitters data set.
+(a) Remove the observations for whom the salary information is unknown, and then log-transform the salaries.
+
+```{r}
+data("Hitters")
+# rm rows wit NA vals
+Hitters <- na.omit(Hitters)
+
+# log-transform salary
+Hitters$Salary <- log(Hitters$Salary)
+head(Hitters)
+```
+
+
+
+(b) Create a training set consisting of the first 200 observations, and a test set consisting of the remaining observations.
+
+```{r}
+# create training and test sets
+set.seed(448)
+train_indices <- 1:200
+Hitters.train <- Hitters[train_indices, ]
+Hitters.test <- Hitters[-train_indices, ]
+# check dimensions
+cat("Training set dimensions:", dim(Hitters.train), "\n")
+cat("Test set dimensions:", dim(Hitters.test), "\n")
+```
+
+
+(c) Perform boosting on the training set with 1,000 trees for a range of values of the shrinkage parameter $\lambda$. Produce a plot with different shrinkage values on the x-axis and the corresponding training set MSE on the y-axis.
+
+```{r}
+# range of shrinkage values
+shrinkage_values <- seq(0.01, 0.1, by = 0.01)
+
+#  init training MSE vecto 
+train_mse <- numeric(length(shrinkage_values))
+
+# for each shrinkage value
+for (i in seq_along(shrinkage_values)) {
+  # fit boosting model
+  boost_model <- gbm(
+    formula = Salary ~ .,
+    data = Hitters.train,
+    distribution = "gaussian",
+    n.trees = 1000,
+    interaction.depth = 4,
+    shrinkage = shrinkage_values[i],
+    bag.fraction = 0.5,
+    verbose = FALSE
+  )
+  # pred on the training set
+  train_pred <- predict(boost_model, Hitters.train, n.trees = 1000)
+  # get training MSE
+  train_mse[i] <- mean((train_pred - Hitters.train$Salary)^2)
+}
+# plot training MSE v shrinkage values
+plot(shrinkage_values, train_mse, type = "b", pch = 19,
+     xlab = "Shrinkage Value ", ylab = "Training MSE",
+     main = "Training MSE vs Shrinkage Value")
+```
+
+
+(d) Produce a plot with different shrinkage values on the x-axis and the corresponding test set MSE on the y-axis.
+
+```{r}
+#  init training MSE vector
+test_mse <- numeric(length(shrinkage_values))
+
+for (i in seq_along(shrinkage_values)) {
+  # fit boosting model
+  boost_model <- gbm(
+    formula = Salary ~ .,
+    data = Hitters.train,
+    distribution = "gaussian",
+    n.trees = 1000,
+    interaction.depth = 4,
+    shrinkage = shrinkage_values[i],
+    bag.fraction = 0.5,
+    verbose = FALSE
+  )
+  #  test set pred
+  test_pred <- predict(boost_model, Hitters.test, n.trees = 1000)
+  # test MSE
+  test_mse[i] <- mean((test_pred - Hitters.test$Salary)^2)
+}
+# plot test MSE v shrinkage vals
+plot(shrinkage_values, test_mse, type = "b", pch = 19,
+     xlab = "Shrinkage Value ", ylab = "Test MSE",
+     main = "Test MSE vs Shrinkage Value")
+```
+
+
+(e) Compare the test MSE of boosting to the test MSE that results from applying two of the regression approaches seen in Chapters 3 and 6.
+```{r}
+
+# pick best shrinkage value from part d
+best_lambda    <- shrinkage_values[which.min(test_mse)]
+best_mse_boost <- min(test_mse)
+
+cat("(e) boosting best shrinkage =", best_lambda,
+    "test mse =", round(best_mse_boost, 3), "\n\n")
+
+# baseline: ordinary least squares
+lm_fit  <- lm(Salary ~ ., data = Hitters.train)
+lm_pred <- predict(lm_fit, Hitters.test)
+lm_mse  <- mean((lm_pred - Hitters.test$Salary)^2)
+cat("linear regression test mse =", round(lm_mse, 3), "\n")
+
+# baseline: ridge regression
+x_train <- model.matrix(Salary ~ ., Hitters.train)[, -1]
+y_train <- Hitters.train$Salary
+x_test  <- model.matrix(Salary ~ ., Hitters.test)[, -1]
+y_test  <- Hitters.test$Salary
+
+set.seed(448)
+cv_ridge  <- cv.glmnet(x_train, y_train, alpha = 0, nfolds = 10)
+ridge_pred <- predict(cv_ridge, s = cv_ridge$lambda.min, newx = x_test)
+ridge_mse  <- mean((ridge_pred - y_test)^2)
+cat("ridge regression test mse =", round(ridge_mse, 3), "\n\n")
+
+# side-by-side mse comparison
+mse_tbl <- tibble::tibble(
+  method   = c("boosting", "linear regression", "ridge regression"),
+  test_mse = round(c(best_mse_boost, lm_mse, ridge_mse), 3)
+)
+print(mse_tbl)
+```
+
+(f) Which variables appear to be the most important predictors in the boosted model?
+```{r}
+# variable importance from the final boosting model
+best_boost <- gbm(
+  Salary ~ ., data = Hitters.train,
+  distribution      = "gaussian",
+  n.trees           = 1000,
+  interaction.depth = 4,
+  shrinkage         = best_lambda,
+  bag.fraction      = 0.5,
+  verbose           = FALSE
+)
+
+imp <- summary(best_boost, plotit = FALSE)
+knitr::kable(
+  head(imp, 10),
+  digits    = 2,
+  col.names = c("variable", "relative influence (%)"),
+  caption   = "top 10 important predictors – boosting"
+)
+
+```
+
+- The top 10 most important predictors for the data set appear to be 
+AtBat, Hits, HmRun, Runs, RBI, Walks, Years, CAtBat, CHits, and CHmRun. From these the most important predictors are AtBat, Hits, HmRun, Runs, and RBI.
+(g) Now apply bagging to the training set. What is the test set MSE for this approach?
+
+```{r}
+# bagging model
+bagging_model <- randomForest(
+  Salary ~ .,
+  data = Hitters.train,
+  mtry = ncol(Hitters.train) - 1,
+  ntree = 500
+)
+# pred on the test set
+bagging_pred <- predict(bagging_model, Hitters.test)
+
+# get test MSE
+bagging_mse <- mean((bagging_pred - Hitters.test$Salary)^2)
+cat("Bagging Test MSE:", round(bagging_mse, 3), "\n")
+
+# Variable importance
+importance(bagging_model)
+# Plot variable importance
+varImpPlot(bagging_model, main = "Variable Importance (Bagging)")
+```
+
+- The test MSE for the bagging approach is 0.232.

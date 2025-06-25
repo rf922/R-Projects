@@ -47,3 +47,5 @@ po/*~
 
 # RStudio Connect folder
 rsconnect/
+chapter-08-hw/*_files/
+chapter-08-hw/*.tex
